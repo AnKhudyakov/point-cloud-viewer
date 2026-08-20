@@ -10,6 +10,14 @@
     "capped": "Capped at {{capacity}} points drawn in one buffer",
     "full": "Full cloud"
   },
+  "clip": {
+    "title": "Section",
+    "enable": "Clip the cloud",
+    "axis": "Cut axis",
+    "flip": "Keep the other side",
+    "position": "Cut position",
+    "split": "Plan view"
+  },
   "data": {
     "loading": "Loading {{percent}}%",
     "loadingUnknown": "Loading",

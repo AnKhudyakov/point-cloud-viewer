@@ -92,6 +92,12 @@
   pointer-events: auto;
 }
 
+.actionActive {
+  border-color: $color-accent;
+  background: $color-accent;
+  color: $color-bg;
+}
+
 .action {
   padding: 2px $space-sm;
   border: 1px solid $color-border;

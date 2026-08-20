@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type CloudSource, type PointCloudData, sourceName } from '@/entities/point-cloud';
+import { ClipSectionControl, useClipSection } from '@/features/clip-section';
 import { ScalarLegend, ScalarRangeControl, useScalarRange } from '@/features/color-by-scalar';
 import { MeasurementPanel, useMeasurement } from '@/features/measure-distance';
 import { PickedPointPanel, usePickedPoint } from '@/features/pick-point';
@@ -17,6 +18,10 @@ import {
 import { CloudSummary } from './CloudSummary';
 import { type ClickMode, ModeSwitch } from './ModeSwitch';
 import styles from './PreviewSection.module.scss';
+
+/** Kept in TypeScript so the canvas can reserve exactly this much room. */
+const SIDEBAR_WIDTH = 340;
+const SIDEBAR_MARGIN = 32;
 
 interface PreviewSectionProps {
   cloud: PointCloudData | null;
@@ -40,7 +45,9 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
   const budget = usePointBudget(capacity);
   const picked = usePickedPoint(cloud);
   const measurement = useMeasurement(cloud);
+  const clip = useClipSection(cloud);
   const [mode, setMode] = useState<ClickMode>('inspect');
+  const [split, setSplit] = useState(false);
   const [stats, setStats] = useState<RenderStats | null>(null);
   const [resetToken, setResetToken] = useState(0);
 
@@ -52,6 +59,11 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
       measurement.add(index);
     }
   };
+
+  const canvasClip = useMemo(
+    () => ({ normal: clip.plane.normal, constant: clip.plane.constant, enabled: clip.enabled }),
+    [clip.plane.normal, clip.plane.constant, clip.enabled],
+  );
 
   const line =
     measurement.from && measurement.to && measurement.segment
@@ -70,6 +82,9 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
         budget={budget.budget}
         selected={picked.index}
         measurement={line}
+        clip={canvasClip}
+        split={split}
+        rightInset={SIDEBAR_WIDTH + SIDEBAR_MARGIN}
         resetToken={resetToken}
         onStats={setStats}
         onPick={handlePick}
@@ -80,9 +95,17 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
           <CloudSummary cloud={cloud} sourceName={sourceName(source)} />
         </div>
 
-        <div className={styles.sidebar}>
+        <div className={styles.sidebar} style={{ width: SIDEBAR_WIDTH }}>
           <div className={styles.toolbar}>
             <ModeSwitch mode={mode} onChange={setMode} />
+            <button
+              type="button"
+              className={`${styles.action} ${split ? styles.actionActive : ''}`}
+              aria-pressed={split}
+              onClick={() => setSplit((value) => !value)}
+            >
+              {t('clip.split')}
+            </button>
             <button
               type="button"
               className={styles.action}
@@ -108,6 +131,11 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
               <h3 className={styles.groupTitle}>{t('scalar.title')}</h3>
               <ScalarLegend range={scalar.range} unit={unit} />
               <ScalarRangeControl state={scalar} />
+            </section>
+
+            <section className={styles.group}>
+              <h3 className={styles.groupTitle}>{t('clip.title')}</h3>
+              <ClipSectionControl state={clip} unit={unit} />
             </section>
 
             <section className={styles.group}>

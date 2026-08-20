@@ -9,6 +9,7 @@ import {
 
 import { metersPerPixel, projectToScreen } from '../lib/project';
 import { niceScaleBar, type ScaleBar } from '../lib/scaleBar';
+import type { Rect } from './../lib/viewports';
 
 export const LABEL_CLASS = 'point-cloud-label';
 export const SCALE_TARGET_PX = 130;
@@ -91,16 +92,18 @@ export class MeasurementOverlay {
   }
 
   /** Repositions the label from the current camera. Called once per frame. */
-  update(camera: Camera, width: number, height: number): void {
+  update(camera: Camera, viewport: Rect): void {
     if (this.view === null || this.disposed) {
       return;
     }
 
     this.midpoint.addVectors(this.view.from, this.view.to).multiplyScalar(0.5);
-    const screen = projectToScreen(this.midpoint, camera, width, height);
+    const screen = projectToScreen(this.midpoint, camera, viewport.width, viewport.height);
+    const x = viewport.x + screen.x;
+    const y = viewport.y + screen.y;
 
     this.label.hidden = !screen.visible;
-    this.label.style.transform = `translate(${screen.x}px, ${screen.y}px) translate(-50%, -50%)`;
+    this.label.style.transform = `translate(${x}px, ${y}px) translate(-50%, -50%)`;
   }
 
   scaleBar(distanceToTarget: number, fovDegrees: number, height: number): ScaleBar {

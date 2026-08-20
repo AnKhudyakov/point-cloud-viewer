@@ -6,6 +6,7 @@ import {
   type Texture,
   UnsignedByteType,
   Vector2,
+  Vector3,
 } from 'three';
 
 import { buildRampTextureData, RAMP_TEXTURE_WIDTH } from '@/entities/point-cloud';
@@ -58,6 +59,9 @@ export function createPointCloudMaterial({
       uHighlightRing: { value: new Color(HIGHLIGHT_RING_COLOR) },
       uHighlightScale: { value: HIGHLIGHT_SCALE },
       uHighlightMinSize: { value: HIGHLIGHT_MIN_SIZE },
+      uClipNormal: { value: new Vector3(0, 0, -1) },
+      uClipConstant: { value: 0 },
+      uClipEnabled: { value: 0 },
     },
     vertexShader,
     fragmentShader,

@@ -109,6 +109,13 @@ export class PointCloudObject {
     return this.drawn;
   }
 
+  setClip(normal: readonly [number, number, number], constant: number, enabled: boolean): void {
+    const uniforms = this.material.uniforms;
+    (uniforms.uClipNormal.value as Vector3).set(normal[0], normal[1], normal[2]);
+    uniforms.uClipConstant.value = constant;
+    uniforms.uClipEnabled.value = enabled ? 1 : 0;
+  }
+
   setSelectedSlot(slot: number | null): void {
     this.material.uniforms.uSelected.value = slot ?? NO_SELECTION;
   }

@@ -11,6 +11,9 @@ uniform float uSelected;
 uniform vec3 uHighlight;
 uniform float uHighlightScale;
 uniform float uHighlightMinSize;
+uniform vec3 uClipNormal;
+uniform float uClipConstant;
+uniform float uClipEnabled;
 
 varying vec3 vColor;
 varying float vSelected;
@@ -18,6 +21,16 @@ varying float vSelected;
 void main() {
   vec4 viewPosition = modelViewMatrix * vec4(position, 1.0);
   gl_Position = projectionMatrix * viewPosition;
+
+  // Clipped points are pushed outside the clip volume, which the GPU discards
+  // before rasterising. Cheaper than a discard in the fragment shader.
+  if (uClipEnabled > 0.5 && dot(uClipNormal, position) + uClipConstant < 0.0) {
+    gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+    gl_PointSize = 0.0;
+    vColor = vec3(0.0);
+    vSelected = 0.0;
+    return;
+  }
 
   float span = max(uScalarRange.y - uScalarRange.x, 1e-6);
   float t = clamp((scalar - uScalarRange.x) / span, 0.0, 1.0);

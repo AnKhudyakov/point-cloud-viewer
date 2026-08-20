@@ -6,6 +6,12 @@ import type { PointCloudData } from '@/entities/point-cloud';
 import { type RenderStats, Viewer } from '../model/Viewer';
 import styles from './PointCloudCanvas.module.scss';
 
+export interface CanvasClip {
+  normal: readonly [number, number, number];
+  constant: number;
+  enabled: boolean;
+}
+
 export interface CanvasMeasurement {
   from: readonly [number, number, number];
   to: readonly [number, number, number];
@@ -18,6 +24,10 @@ interface PointCloudCanvasProps {
   budget: number;
   selected: number | null;
   measurement: CanvasMeasurement | null;
+  clip: CanvasClip;
+  split: boolean;
+  /** Width reserved on the right for the control panel, in CSS pixels. */
+  rightInset: number;
   resetToken: number;
   onStats: (stats: RenderStats) => void;
   onPick: (sourceIndex: number | null) => void;
@@ -29,6 +39,9 @@ export function PointCloudCanvas({
   budget,
   selected,
   measurement,
+  clip,
+  split,
+  rightInset,
   resetToken,
   onStats,
   onPick,
@@ -88,6 +101,14 @@ export function PointCloudCanvas({
           },
     );
   }, [measurement]);
+
+  useEffect(() => {
+    viewerRef.current?.setClip(clip.normal, clip.constant, clip.enabled);
+  }, [clip]);
+
+  useEffect(() => {
+    viewerRef.current?.setLayout(split, rightInset);
+  }, [split, rightInset]);
 
   useEffect(() => {
     if (resetToken > 0) {

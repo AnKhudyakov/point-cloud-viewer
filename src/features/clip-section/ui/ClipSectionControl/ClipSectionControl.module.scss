@@ -1,0 +1,65 @@
+.control {
+  display: grid;
+  gap: $space-sm;
+}
+
+.row {
+  display: flex;
+  gap: $space-sm;
+  align-items: center;
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 11px;
+}
+
+.toggle {
+  display: flex;
+  gap: $space-xs;
+  align-items: center;
+  color: $color-text-muted;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.axes {
+  display: inline-flex;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  overflow: hidden;
+}
+
+.axis {
+  padding: 2px $space-sm;
+  border: 0;
+  background: transparent;
+  color: $color-text-muted;
+  font: inherit;
+  font-size: 11px;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    color: $color-text;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &.active {
+    background: $color-accent;
+    color: $color-bg;
+  }
+}
+
+.slider {
+  flex: 1;
+  accent-color: $color-accent;
+}
+
+.value {
+  color: $color-text;
+  min-width: 62px;
+  text-align: right;
+}
