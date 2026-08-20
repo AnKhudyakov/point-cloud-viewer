@@ -1,0 +1,23 @@
+.legend {
+  display: grid;
+  grid-template-columns: 12px auto;
+  gap: $space-sm;
+  align-items: stretch;
+}
+
+.bar {
+  width: 12px;
+  height: 160px;
+  border: 1px solid $color-border;
+  border-radius: 2px;
+}
+
+.ticks {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 11px;
+  white-space: nowrap;
+}

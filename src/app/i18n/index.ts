@@ -28,3 +28,10 @@ await i18next
       caches: ['localStorage'],
     },
   });
+
+function syncDocumentLanguage(language: string): void {
+  document.documentElement.lang = language;
+}
+
+syncDocumentLanguage(i18next.resolvedLanguage ?? FALLBACK_LANGUAGE);
+i18next.on('languageChanged', syncDocumentLanguage);

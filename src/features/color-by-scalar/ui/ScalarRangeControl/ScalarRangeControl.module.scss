@@ -1,0 +1,39 @@
+.control {
+  display: grid;
+  gap: $space-sm;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  gap: $space-sm;
+  align-items: center;
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 11px;
+}
+
+.slider {
+  width: 100%;
+  accent-color: $color-accent;
+}
+
+.reset {
+  padding: 2px $space-sm;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: transparent;
+  color: $color-text;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    border-color: $color-accent;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}

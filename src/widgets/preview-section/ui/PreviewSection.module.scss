@@ -1,12 +1,71 @@
 .section {
-  display: grid;
-  place-items: center;
+  position: relative;
   height: 100%;
-  padding: $space-lg;
 }
 
 .empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
   color: $color-text-muted;
   font-family: $font-mono;
   font-size: 13px;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: $space-md;
+  gap: $space-md;
+  pointer-events: none;
+}
+
+.panel {
+  display: grid;
+  gap: $space-md;
+  padding: $space-md;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: rgba(22, 27, 34, 0.88);
+  pointer-events: auto;
+}
+
+.panelTitle {
+  margin: 0;
+  color: $color-text-muted;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.summarySlot {
+  align-self: flex-end;
+}
+
+.footerHint {
+  position: absolute;
+  right: $space-md;
+  bottom: $space-md;
+  color: $color-text-muted;
+  font-size: 11px;
+  pointer-events: none;
+}
+
+.action {
+  padding: 2px $space-sm;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: transparent;
+  color: $color-text;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $color-accent;
+  }
 }

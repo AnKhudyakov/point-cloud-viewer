@@ -1,0 +1,1 @@
+export { ScalarLegend } from './ScalarLegend';

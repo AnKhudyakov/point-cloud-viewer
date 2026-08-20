@@ -21,6 +21,15 @@ export {
   type Vec3,
 } from './lib/binaryFormat';
 export { boundsDiagonal, computeBounds } from './lib/bounds';
+export {
+  buildRampTextureData,
+  normalizeScalar,
+  RAMP_STOPS,
+  RAMP_TEXTURE_WIDTH,
+  rampCssGradient,
+  type RampStop,
+  sampleRamp,
+} from './lib/colormap';
 export { decodePointCloud, toAbsolute } from './lib/decode';
 export {
   BINARY_EXTENSION,

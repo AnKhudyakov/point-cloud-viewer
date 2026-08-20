@@ -2,8 +2,11 @@ import { createRandom, fbm } from './random.ts';
 
 export const TARGET_DENSITY = 25;
 
-export const GROUND_MIN = 120;
-export const GROUND_MAX = 340;
+export const GROUND_BASE = 120;
+
+export const RELIEF_RATIO = 0.22;
+export const MIN_RELIEF = 8;
+export const MAX_RELIEF = 400;
 
 const CALIBRATION_STEPS = 128;
 
@@ -19,6 +22,7 @@ export interface Building {
 export interface Scene {
   seed: number;
   extent: number;
+  relief: number;
   buildings: Building[];
   fieldMin: number;
   fieldMax: number;
@@ -26,9 +30,11 @@ export interface Scene {
 
 export function createScene(seed: number, pointCount: number): Scene {
   const extent = Math.round(Math.sqrt(pointCount / TARGET_DENSITY));
+  const relief = Math.min(Math.max(extent * RELIEF_RATIO, MIN_RELIEF), MAX_RELIEF);
   const draft: Scene = {
     seed,
     extent,
+    relief,
     buildings: createBuildings(seed, extent),
     fieldMin: 0,
     fieldMax: 1,
@@ -62,7 +68,7 @@ export function groundHeight(scene: Scene, x: number, y: number): number {
   const t = (heightField(scene, x, y) - scene.fieldMin) / span;
 
   const clamped = t < 0 ? 0 : t > 1 ? 1 : t;
-  return GROUND_MIN + clamped * (GROUND_MAX - GROUND_MIN);
+  return GROUND_BASE + clamped * scene.relief;
 }
 
 export function densityAt(scene: Scene, x: number, y: number): number {
@@ -79,15 +85,17 @@ export function vegetationAt(scene: Scene, x: number, y: number): number {
 function createBuildings(seed: number, extent: number): Building[] {
   const random = createRandom(seed + 977);
   const count = Math.max(2, Math.round((extent * extent) / 3500));
+  const maxHalfSize = Math.max(Math.min(20, extent * 0.08), 2);
+  const maxHeight = Math.max(Math.min(28, extent * 0.2), 3);
   const buildings: Building[] = [];
 
   for (let i = 0; i < count; i += 1) {
     buildings.push({
       cx: random() * extent,
       cy: random() * extent,
-      halfWidth: 6 + random() * 14,
-      halfDepth: 6 + random() * 14,
-      height: 6 + random() * 22,
+      halfWidth: maxHalfSize * (0.4 + random() * 0.6),
+      halfDepth: maxHalfSize * (0.4 + random() * 0.6),
+      height: maxHeight * (0.3 + random() * 0.7),
       yaw: random() * Math.PI,
     });
   }
