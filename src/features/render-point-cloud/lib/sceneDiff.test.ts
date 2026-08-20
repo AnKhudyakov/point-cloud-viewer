@@ -24,6 +24,7 @@ function state(overrides: Partial<SceneState> = {}): SceneState {
     scalarRange: [120, 340],
     selected: null,
     measurement: null,
+    annotations: [],
     clip: { normal: [0, 0, -1], constant: 130, enabled: false },
     split: false,
     rightInset: 0,
@@ -122,9 +123,30 @@ describe('sceneChanges', () => {
       false,
     );
     expect(
-      sceneChanges(withLine, state({ ...same, measurement: { ...line, text: '1.74 m' } }))
+      sceneChanges(withLine, state({ ...same, measurement: { ...line, to: [2, 2, 2] } }))
         .measurement,
     ).toBe(true);
     expect(sceneChanges(withLine, state({ ...same, measurement: null })).measurement).toBe(true);
+  });
+
+  it('compares annotations by id, text and anchor', () => {
+    const base = state();
+    const same = { cloud: base.cloud };
+    const label = { id: 'pick', anchor: [1, 2, 3] as const, text: '120.5 m' };
+    const withLabel = state({ ...same, annotations: [label] });
+
+    expect(sceneChanges(base, withLabel).annotations).toBe(true);
+    expect(
+      sceneChanges(withLabel, state({ ...same, annotations: [{ ...label }] })).annotations,
+    ).toBe(false);
+    expect(
+      sceneChanges(withLabel, state({ ...same, annotations: [{ ...label, text: '121 m' }] }))
+        .annotations,
+    ).toBe(true);
+    expect(
+      sceneChanges(withLabel, state({ ...same, annotations: [{ ...label, anchor: [1, 2, 4] }] }))
+        .annotations,
+    ).toBe(true);
+    expect(sceneChanges(withLabel, state({ ...same, annotations: [] })).annotations).toBe(true);
   });
 });

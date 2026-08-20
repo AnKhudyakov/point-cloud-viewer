@@ -13,10 +13,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { type PointCloudData, slotForSource, sourceIndexFor } from '@/entities/point-cloud';
 
 import { frameBounds } from '../lib/frameBounds';
-import type { SceneClip, SceneMeasurement, SceneState } from '../lib/scene';
+import type { SceneAnnotation, SceneClip, SceneMeasurement, SceneState } from '../lib/scene';
 import { sceneChanges } from '../lib/sceneDiff';
 import { contains, type Rect, splitViewports, toGlViewport, toNdc } from '../lib/viewports';
-import { MeasurementOverlay } from './MeasurementOverlay';
+import { AnnotationOverlay } from './AnnotationOverlay';
 import { createRampTexture, projectionScale } from './pointCloudMaterial';
 import { PointCloudObject } from './PointCloudObject';
 
@@ -59,7 +59,7 @@ export class Viewer {
 
   private readonly ramp = createRampTexture();
 
-  private readonly overlay: MeasurementOverlay;
+  private readonly overlay: AnnotationOverlay;
 
   private readonly planCamera = new OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
 
@@ -122,8 +122,8 @@ export class Viewer {
     this.controls.dampingFactor = 0.12;
     this.controls.screenSpacePanning = false;
 
-    this.overlay = new MeasurementOverlay(container);
-    this.scene.add(this.overlay.line);
+    this.overlay = new AnnotationOverlay(container);
+    this.scene.add(...this.overlay.objects);
 
     this.canvas.addEventListener('pointerdown', this.handlePointerDown);
     this.canvas.addEventListener('pointerup', this.handlePointerUp);
@@ -156,6 +156,7 @@ export class Viewer {
     if (changed.selected) this.setSelection(next.selected);
     if (changed.clip) this.setClip(next.clip);
     if (changed.measurement) this.setMeasurement(next.measurement);
+    if (changed.annotations) this.setAnnotations(next.annotations);
     if (changed.layout) this.setLayout(next.split, next.rightInset);
 
     this.applied = next;
@@ -186,15 +187,11 @@ export class Viewer {
   }
 
   private setMeasurement(measurement: SceneMeasurement | null): void {
-    this.overlay.set(
-      measurement === null
-        ? null
-        : {
-            from: new Vector3(...measurement.from),
-            to: new Vector3(...measurement.to),
-            text: measurement.text,
-          },
-    );
+    this.overlay.setMeasurement(measurement);
+  }
+
+  private setAnnotations(annotations: readonly SceneAnnotation[]): void {
+    this.overlay.setAnnotations(annotations);
   }
 
   private setSelection(sourceIndex: number | null): void {
@@ -252,7 +249,7 @@ export class Viewer {
 
     this.clearCloud();
 
-    this.scene.remove(this.overlay.line);
+    this.scene.remove(...this.overlay.objects);
     this.overlay.dispose();
 
     this.ramp.dispose();

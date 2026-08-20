@@ -14,6 +14,7 @@ import {
   RenderStatsPanel,
   SAMPLE_CAPACITY,
   ScaleBar,
+  type SceneAnnotation,
 } from '@/features/render-point-cloud';
 
 import { CloudSummary } from './CloudSummary';
@@ -62,13 +63,25 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
   };
 
   const line =
-    measurement.from && measurement.to && measurement.segment
-      ? {
-          from: measurement.from.local,
-          to: measurement.to.local,
-          text: `${measurement.segment.distance.toFixed(2)} ${unit}`,
-        }
+    measurement.from && measurement.to
+      ? { from: measurement.from.local, to: measurement.to.local }
       : null;
+
+  const annotations: SceneAnnotation[] = [];
+  if (measurement.from && measurement.to && measurement.segment) {
+    annotations.push({
+      id: 'measurement',
+      anchor: midpoint(measurement.from.local, measurement.to.local),
+      text: `${measurement.segment.distance.toFixed(2)} ${unit}`,
+    });
+  }
+  if (picked.point) {
+    annotations.push({
+      id: 'picked',
+      anchor: picked.point.local,
+      text: `${picked.point.scalar.toFixed(2)} ${unit}`,
+    });
+  }
 
   return (
     <div className={styles.section}>
@@ -79,6 +92,7 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
         budget={budget.budget}
         selected={picked.index}
         measurement={line}
+        annotations={annotations}
         clip={{ ...clip.plane, enabled: clip.enabled }}
         split={split}
         rightInset={SIDEBAR_WIDTH + SIDEBAR_MARGIN}
@@ -153,4 +167,11 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
       </div>
     </div>
   );
+}
+
+function midpoint(
+  a: readonly [number, number, number],
+  b: readonly [number, number, number],
+): [number, number, number] {
+  return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2];
 }
