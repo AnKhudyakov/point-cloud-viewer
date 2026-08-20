@@ -13,8 +13,10 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { type PointCloudData, slotForSource, sourceIndexFor } from '@/entities/point-cloud';
 
 import { frameBounds } from '../lib/frameBounds';
+import type { SceneClip, SceneMeasurement, SceneState } from '../lib/scene';
+import { sceneChanges } from '../lib/sceneDiff';
 import { contains, type Rect, splitViewports, toGlViewport, toNdc } from '../lib/viewports';
-import { MeasurementOverlay, type MeasurementView } from './MeasurementOverlay';
+import { MeasurementOverlay } from './MeasurementOverlay';
 import { createRampTexture, projectionScale } from './pointCloudMaterial';
 import { PointCloudObject } from './PointCloudObject';
 
@@ -31,7 +33,7 @@ export interface RenderStats {
   programs: number;
 }
 
-export interface ViewerOptions {
+export interface ViewerCallbacks {
   onStats?: (stats: RenderStats) => void;
   onPick?: (sourceIndex: number | null) => void;
 }
@@ -77,9 +79,9 @@ export class Viewer {
 
   private disposed = false;
 
-  private readonly onStats: ((stats: RenderStats) => void) | undefined;
+  private callbacks: ViewerCallbacks = {};
 
-  private readonly onPick: ((sourceIndex: number | null) => void) | undefined;
+  private applied: SceneState | null = null;
 
   private readonly raycaster = new Raycaster();
 
@@ -101,10 +103,8 @@ export class Viewer {
 
   private readonly canvas: HTMLCanvasElement;
 
-  constructor(container: HTMLElement, options: ViewerOptions = {}) {
+  constructor(container: HTMLElement) {
     this.container = container;
-    this.onStats = options.onStats;
-    this.onPick = options.onPick;
 
     this.canvas = document.createElement('canvas');
     this.canvas.className = CANVAS_CLASS;
@@ -135,7 +135,33 @@ export class Viewer {
     this.loop();
   }
 
-  setCloud(data: PointCloudData): void {
+  setCallbacks(callbacks: ViewerCallbacks): void {
+    this.callbacks = callbacks;
+  }
+
+  /**
+   * Brings the scene in line with the state React describes.
+   *
+   * Called after every render and does nothing when nothing moved, which is why
+   * the React side needs no effect per control. Loading a cloud resets the
+   * object's budget, selection and uniforms, so a cloud change re-applies
+   * everything that hangs off it rather than leaving the two sides disagreeing.
+   */
+  apply(next: SceneState): void {
+    const changed = sceneChanges(this.applied, next);
+
+    if (changed.cloud) this.setCloud(next.cloud);
+    if (changed.budget) this.setBudget(next.budget);
+    if (changed.scalarRange) this.setScalarRange(next.scalarRange[0], next.scalarRange[1]);
+    if (changed.selected) this.setSelection(next.selected);
+    if (changed.clip) this.setClip(next.clip);
+    if (changed.measurement) this.setMeasurement(next.measurement);
+    if (changed.layout) this.setLayout(next.split, next.rightInset);
+
+    this.applied = next;
+  }
+
+  private setCloud(data: PointCloudData): void {
     this.clearCloud();
 
     this.cloud = new PointCloudObject(data, this.ramp);
@@ -149,26 +175,34 @@ export class Viewer {
     this.reportStats(true);
   }
 
-  setLayout(split: boolean, rightInset: number): void {
+  private setLayout(split: boolean, rightInset: number): void {
     this.split = split;
     this.rightInset = rightInset;
     this.resize();
   }
 
-  setClip(normal: readonly [number, number, number], constant: number, enabled: boolean): void {
-    this.cloud?.setClip(normal, constant, enabled);
+  private setClip(clip: SceneClip): void {
+    this.cloud?.setClip(clip.normal, clip.constant, clip.enabled);
   }
 
-  setMeasurement(view: MeasurementView | null): void {
-    this.overlay.set(view);
+  private setMeasurement(measurement: SceneMeasurement | null): void {
+    this.overlay.set(
+      measurement === null
+        ? null
+        : {
+            from: new Vector3(...measurement.from),
+            to: new Vector3(...measurement.to),
+            text: measurement.text,
+          },
+    );
   }
 
-  setSelection(sourceIndex: number | null): void {
+  private setSelection(sourceIndex: number | null): void {
     this.selected = sourceIndex;
     this.applySelection();
   }
 
-  setBudget(budget: number): void {
+  private setBudget(budget: number): void {
     if (!this.cloud) {
       return;
     }
@@ -179,20 +213,8 @@ export class Viewer {
     this.reportStats(true);
   }
 
-  get capacity(): number {
-    return this.cloud?.capacity ?? 0;
-  }
-
-  setScalarRange(min: number, max: number): void {
+  private setScalarRange(min: number, max: number): void {
     this.cloud?.setScalarRange(min, max);
-  }
-
-  setPointSize(size: number): void {
-    this.cloud?.setPointSize(size);
-  }
-
-  get pointSize(): number {
-    return this.cloud?.pointSize ?? 0;
   }
 
   resetView(): void {
@@ -340,7 +362,8 @@ export class Viewer {
   };
 
   private pick(event: PointerEvent): void {
-    if (!this.cloud || !this.onPick) {
+    const onPick = this.callbacks.onPick;
+    if (!this.cloud || !onPick) {
       return;
     }
 
@@ -362,7 +385,7 @@ export class Viewer {
     const hit = this.raycaster.intersectObject(this.cloud.points, false)[0];
     const slot = hit?.index;
 
-    this.onPick(slot === undefined ? null : sourceIndexFor(slot, this.stride));
+    onPick(slot === undefined ? null : sourceIndexFor(slot, this.stride));
   }
 
   /**
@@ -413,7 +436,8 @@ export class Viewer {
   }
 
   private reportStats(force: boolean): void {
-    if (!this.onStats || !this.cloud) {
+    const onStats = this.callbacks.onStats;
+    if (!onStats || !this.cloud) {
       return;
     }
     if (force) {
@@ -427,7 +451,7 @@ export class Viewer {
       this.container.clientHeight,
     );
 
-    this.onStats({
+    onStats({
       fps: Math.round(this.fps),
       scaleMeters: bar.meters,
       scalePixels: bar.pixels,

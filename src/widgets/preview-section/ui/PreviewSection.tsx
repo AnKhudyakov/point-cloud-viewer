@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { type CloudSource, type PointCloudData, sourceName } from '@/entities/point-cloud';
@@ -9,6 +9,7 @@ import { PickedPointPanel, usePickedPoint } from '@/features/pick-point';
 import { PointBudgetControl, usePointBudget } from '@/features/point-budget';
 import {
   PointCloudCanvas,
+  type PointCloudCanvasHandle,
   type RenderStats,
   RenderStatsPanel,
   SAMPLE_CAPACITY,
@@ -49,7 +50,7 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
   const [mode, setMode] = useState<ClickMode>('inspect');
   const [split, setSplit] = useState(false);
   const [stats, setStats] = useState<RenderStats | null>(null);
-  const [resetToken, setResetToken] = useState(0);
+  const canvasRef = useRef<PointCloudCanvasHandle>(null);
 
   const unit = t('scalar.unit');
 
@@ -59,11 +60,6 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
       measurement.add(index);
     }
   };
-
-  const canvasClip = useMemo(
-    () => ({ normal: clip.plane.normal, constant: clip.plane.constant, enabled: clip.enabled }),
-    [clip.plane.normal, clip.plane.constant, clip.enabled],
-  );
 
   const line =
     measurement.from && measurement.to && measurement.segment
@@ -77,15 +73,15 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
   return (
     <div className={styles.section}>
       <PointCloudCanvas
+        ref={canvasRef}
         cloud={cloud}
         scalarRange={scalar.range}
         budget={budget.budget}
         selected={picked.index}
         measurement={line}
-        clip={canvasClip}
+        clip={{ ...clip.plane, enabled: clip.enabled }}
         split={split}
         rightInset={SIDEBAR_WIDTH + SIDEBAR_MARGIN}
-        resetToken={resetToken}
         onStats={setStats}
         onPick={handlePick}
       />
@@ -109,7 +105,7 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
             <button
               type="button"
               className={styles.action}
-              onClick={() => setResetToken((value) => value + 1)}
+              onClick={() => canvasRef.current?.resetView()}
             >
               {t('preview.resetView')}
             </button>

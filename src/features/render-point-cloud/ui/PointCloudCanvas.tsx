@@ -1,120 +1,25 @@
-import { useEffect, useRef } from 'react';
-import { Vector3 } from 'three';
+import { type Ref, useImperativeHandle, useRef } from 'react';
 
-import type { PointCloudData } from '@/entities/point-cloud';
-
-import { type RenderStats, Viewer } from '../model/Viewer';
+import type { SceneState } from '../lib/scene';
+import { useViewer } from '../model/useViewer';
+import type { RenderStats } from '../model/Viewer';
 import styles from './PointCloudCanvas.module.scss';
 
-export interface CanvasClip {
-  normal: readonly [number, number, number];
-  constant: number;
-  enabled: boolean;
+export interface PointCloudCanvasHandle {
+  resetView: () => void;
 }
 
-export interface CanvasMeasurement {
-  from: readonly [number, number, number];
-  to: readonly [number, number, number];
-  text: string;
-}
-
-interface PointCloudCanvasProps {
-  cloud: PointCloudData;
-  scalarRange: readonly [number, number];
-  budget: number;
-  selected: number | null;
-  measurement: CanvasMeasurement | null;
-  clip: CanvasClip;
-  split: boolean;
-  /** Width reserved on the right for the control panel, in CSS pixels. */
-  rightInset: number;
-  resetToken: number;
+interface PointCloudCanvasProps extends SceneState {
   onStats: (stats: RenderStats) => void;
   onPick: (sourceIndex: number | null) => void;
+  ref?: Ref<PointCloudCanvasHandle>;
 }
 
-export function PointCloudCanvas({
-  cloud,
-  scalarRange,
-  budget,
-  selected,
-  measurement,
-  clip,
-  split,
-  rightInset,
-  resetToken,
-  onStats,
-  onPick,
-}: PointCloudCanvasProps) {
+export function PointCloudCanvas({ onStats, onPick, ref, ...scene }: PointCloudCanvasProps) {
   const stageRef = useRef<HTMLDivElement>(null);
-  const viewerRef = useRef<Viewer | null>(null);
-  const statsRef = useRef(onStats);
-  const pickRef = useRef(onPick);
+  const { resetView } = useViewer(stageRef, scene, { onStats, onPick });
 
-  useEffect(() => {
-    statsRef.current = onStats;
-    pickRef.current = onPick;
-  }, [onStats, onPick]);
-
-  useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) {
-      return;
-    }
-
-    const viewer = new Viewer(stage, {
-      onStats: (stats) => statsRef.current(stats),
-      onPick: (sourceIndex) => pickRef.current(sourceIndex),
-    });
-    viewerRef.current = viewer;
-
-    return () => {
-      viewerRef.current = null;
-      viewer.dispose();
-    };
-  }, []);
-
-  useEffect(() => {
-    viewerRef.current?.setCloud(cloud);
-  }, [cloud]);
-
-  useEffect(() => {
-    viewerRef.current?.setBudget(budget);
-  }, [budget]);
-
-  useEffect(() => {
-    viewerRef.current?.setScalarRange(scalarRange[0], scalarRange[1]);
-  }, [scalarRange]);
-
-  useEffect(() => {
-    viewerRef.current?.setSelection(selected);
-  }, [selected]);
-
-  useEffect(() => {
-    viewerRef.current?.setMeasurement(
-      measurement === null
-        ? null
-        : {
-            from: new Vector3(...measurement.from),
-            to: new Vector3(...measurement.to),
-            text: measurement.text,
-          },
-    );
-  }, [measurement]);
-
-  useEffect(() => {
-    viewerRef.current?.setClip(clip.normal, clip.constant, clip.enabled);
-  }, [clip]);
-
-  useEffect(() => {
-    viewerRef.current?.setLayout(split, rightInset);
-  }, [split, rightInset]);
-
-  useEffect(() => {
-    if (resetToken > 0) {
-      viewerRef.current?.resetView();
-    }
-  }, [resetToken]);
+  useImperativeHandle(ref, () => ({ resetView }), [resetView]);
 
   return <div ref={stageRef} className={styles.stage} />;
 }
