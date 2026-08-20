@@ -10,6 +10,7 @@
     "type": "git",
     "url": "git+https://github.com/AnKhudyakov/point-cloud-viewer.git"
   },
+  "homepage": "https://point-cloud-viewer-nu.vercel.app",
   "engines": {
     "node": ">=20.19"
   },
