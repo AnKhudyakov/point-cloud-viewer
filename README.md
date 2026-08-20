@@ -4,7 +4,7 @@ Browser point cloud viewer on Three.js: custom point shader, point budget, picki
 clipping plane, plan view beside the 3D scene. Three.js gives the renderer, scene graph, camera
 controls, raycaster and loaders; this project is the application layer on top.
 
-Live demo: **https://point-cloud-viewer.vercel.app**
+Live demo: **https://point-cloud-viewer-nu.vercel.app**
 
 **Stack:** React 19, TypeScript 6 strict, Vite 8, Three.js 0.185, SCSS modules, Vitest, ESLint with
 Feature-Sliced Design boundaries.
