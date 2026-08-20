@@ -1,12 +1,10 @@
 # Point Cloud Viewer
 
 Browser point cloud viewer on Three.js: custom point shader, point budget, picking, measurement,
-clipping plane, plan view beside the 3D scene.
+clipping plane, plan view beside the 3D scene. Three.js gives the renderer, scene graph, camera
+controls, raycaster and loaders; this project is the application layer on top.
 
 Live demo: **https://point-cloud-viewer.vercel.app**
-
-Three.js gives the renderer, scene graph, camera controls, raycaster and loaders. This project is
-the application layer on top.
 
 **Stack:** React 19, TypeScript 6 strict, Vite 8, Three.js 0.185, SCSS modules, Vitest, ESLint with
 Feature-Sliced Design boundaries.
@@ -29,7 +27,9 @@ Feature-Sliced Design boundaries.
 
 ## Data
 
-Every source resolves to one type before the renderer sees anything:
+Every source resolves to one type before the renderer sees anything. The origin is float64 and the
+points are float32 relative to it, because projected coordinates in the millions of meters lose half
+a meter of precision in float32 alone.
 
 ```ts
 interface PointCloudData {
@@ -42,84 +42,29 @@ interface PointCloudData {
 }
 ```
 
-**Why the origin is float64.** Real scans carry projected coordinates, and UTM northings reach into
-the millions. Float32 gives about seven significant digits, so near 5,678,901 the gap between
-representable values is half a meter: points snap to that grid, the cloud shimmers as the camera
-moves, measurements drift. So the origin is double precision and the points are float32 relative to
-it. Pick a point and the panel shows both coordinates.
-
-**File format.** Little endian, a 92 byte header, then two typed array blocks:
-
-| Offset   | Size | Field                                     |
-| -------- | ---- | ----------------------------------------- |
-| 0        | 4    | magic, ASCII `PCVB`                       |
-| 4        | 4    | version, uint32                           |
-| 8        | 4    | pointCount, uint32                        |
-| 12       | 24   | origin, 3 x float64                       |
-| 36       | 24   | bboxMin, 3 x float64, absolute            |
-| 60       | 24   | bboxMax, 3 x float64, absolute            |
-| 84       | 4    | scalarMin, float32                        |
-| 88       | 4    | scalarMax, float32                        |
-| 92       | 12n  | positions, float32 xyz relative to origin |
-| 92 + 12n | 4n   | scalars, float32                          |
-
-Both blocks are four byte aligned, so the decoder builds `Float32Array` views over the downloaded
-buffer instead of copying. Sixteen bytes per point. The bounding box comes from the header, and a
-bad magic, unknown version or wrong length is rejected before the data reaches the GPU.
-
 ## Rendering pipeline
 
-One `THREE.Points`, one `BufferGeometry`, one draw call. Attributes: `position`, `scalar`, and a
-static `slot` index for highlighting.
-
-The vertex shader normalises the scalar against a range uniform, samples a 256 pixel ramp texture,
-and sets `gl_PointSize` to `pointSize * projectionScale / depth`. With `projectionScale` derived
-from the buffer height and the field of view, `pointSize` is a diameter in meters, so points keep
-their physical size as the camera moves. The default comes from the mean point spacing.
-
-Colour lives in the shader, not in a `color` attribute. The range is adjustable, and a colour
-attribute would mean re-uploading three floats per point on every drag of the slider. In the shader
-it is one uniform write. The ramp is declared once in TypeScript and feeds both the texture and the
-legend gradient.
-
-Highlighting compares `slot` against a `uSelected` uniform, so selecting a point costs one uniform
-write and no buffer upload. Clipping is a dot product against a plane uniform; clipped points are
-moved outside the clip volume for the GPU to drop.
+One `THREE.Points`, one `BufferGeometry`, one draw call, with `position`, `scalar` and a static
+`slot` index as attributes. The vertex shader samples a ramp texture with the normalised scalar and
+sizes the point in meters with distance attenuation, so colour and size both come from the GPU
+rather than from a rebuilt buffer. Highlighting compares `slot` against a uniform, and clipping is a
+dot product against a plane uniform, so both cost one uniform write.
 
 ## Point budget
 
-The slider caps drawn points, logarithmically from ten thousand to the whole cloud.
-
-On a change: stride is `ceil(total / budget)`, every stride-th point is copied into buffers
-allocated once per cloud, the draw range moves, and only the changed range is uploaded via
-`addUpdateRange`. The geometry, the material, the `Points` object and the attributes are never
-recreated; a test holds references to all four and asserts they survive three budget changes.
-
-The drawn subset is compacted rather than indexed. Strided index reads would still pull cache lines
-from across the whole buffer, and the frame time would barely follow the budget.
-
-The bundled cloud is 500,000 points and 7.6 MB. The generator writes thirty million in twelve
-seconds at constant memory. One buffer is capped at eight million drawn points. FPS, drawn against
-total, the stride and the live GPU resource counts are in the interface, so the numbers can be read
-on your own hardware.
-
-The plan view shares one context and one canvas with the 3D view: two viewports with the scissor
-test on. A second renderer would mean a second WebGL context, and browsers grant few of those.
+The slider caps drawn points, logarithmically from ten thousand to the whole cloud. Every stride-th
+point is copied into buffers allocated once per cloud, the draw range moves, and only the changed
+range is uploaded; the geometry, material, `Points` object and attributes are never recreated. FPS,
+drawn against total and the live GPU resource counts are in the interface, so the effect can be
+measured on your own hardware.
 
 ## Releasing resources
 
 Three.js frees nothing when an object leaves the scene, and a canvas holding a WebGL context keeps
-that context alive.
-
-A cloud owns its geometry and material and releases both when replaced. The viewer owns the ramp
-texture, the annotation geometries and materials, the controls, the resize observer, the pointer
-listeners, the animation frame, the renderer and the canvas it created.
-
-The ramp texture is the case worth naming: shared by every material the viewer builds, so it must
-survive a cloud swap and go only with the viewer. Releasing a shared resource with the first object
-that used it is the usual form of this bug; a test asserts that disposing a cloud leaves the texture
-alone. Across twelve cloud swaps, with a forced garbage collection before each reading, the counts
-of live canvases, contexts, observers, DOM nodes, listeners and GPU resources are all unchanged.
+that context alive. A cloud owns its geometry and material and releases both when replaced; the ramp
+texture is shared by every material, so it belongs to the viewer and goes only with it. Across
+twelve cloud swaps the counts of live canvases, contexts, observers, listeners and GPU resources are
+all unchanged.
 
 ## Limits
 
@@ -128,7 +73,6 @@ of live canvases, contexts, observers, DOM nodes, listeners and GPU resources ar
 - No culling beyond one bounding sphere for the whole cloud.
 - Eight million drawn points per buffer.
 - One format in the browser. Compressed lidar is converted offline, there is no `.laz` parser here.
-- Datasets are decimated in advance, not at runtime.
 - Picking is linear over the drawn points, so its cost follows the budget.
 
 [Potree](https://github.com/potree/potree) has the octree and the out of core level of detail, and
@@ -136,14 +80,11 @@ is the right reference for what a full system looks like.
 
 ## Dataset
 
-The bundled cloud is synthetic, written by `npm run seed` and never committed. It is built to break
-the viewer where real data does: shifted origin, Z up, elevations away from zero, uneven density,
-vegetation above the surface, rotated buildings for a section plane to cut. Point count is an
-argument, from a hundred thousand to thirty million.
-
-Synthetic data needs no attribution. When a real tile ships, the credit goes here and into the
-interface footer, which already has a slot for it. Code is MIT; a data licence would cover the
-sample data only.
+The bundled cloud is synthetic, written by `npm run seed` and never committed, with the point count
+as an argument from a hundred thousand to thirty million. It is built to break the viewer where real
+data does: shifted origin, Z up, uneven density, vegetation above the surface, buildings for a
+section plane to cut. Code here is MIT; when a real tile ships, its licence covers the sample data
+only.
 
 ## Running it
 
@@ -168,7 +109,9 @@ npm run dev
 ## Structure
 
 Feature-Sliced Design, with layer order and slice public APIs enforced by `eslint-plugin-boundaries`
-rather than only documented.
+rather than only documented. The imperative Three.js layer sits in
+`features/render-point-cloud/model`: React describes the viewer state as one plain object and the
+viewer reconciles it, so the React side holds no graphics types.
 
 ```
 src/
@@ -181,13 +124,6 @@ src/
   shared/     config, lib, ui, style tokens
 scripts/      offline cloud generator
 ```
-
-The imperative Three.js layer sits in `features/render-point-cloud/model`. React describes the
-viewer state as one plain object and the viewer reconciles it, so the React side holds no graphics
-types.
-
-Tests cover the geometry and the format, where a mistake would be silent. Rendering is not unit
-tested.
 
 ## Licence
 
