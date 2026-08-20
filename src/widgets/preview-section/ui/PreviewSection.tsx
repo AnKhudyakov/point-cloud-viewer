@@ -101,7 +101,7 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
       />
 
       <div className={styles.overlay}>
-        <div className={styles.summarySlot}>
+        <div className={styles.summarySlot} style={{ width: SIDEBAR_WIDTH }}>
           <CloudSummary cloud={cloud} sourceName={sourceName(source)} />
         </div>
 
