@@ -10,7 +10,9 @@ export interface PickedPointState {
 }
 
 export function usePickedPoint(cloud: PointCloudData): PickedPointState {
-  const [index, setIndex] = useState<number | null>(null);
+  const [picked, setPicked] = useState<{ cloud: PointCloudData; index: number } | null>(null);
+
+  const index = picked?.cloud === cloud ? picked.index : null;
 
   const point = useMemo(() => {
     if (index === null || index >= cloud.pointCount) {
@@ -19,12 +21,15 @@ export function usePickedPoint(cloud: PointCloudData): PickedPointState {
     return describePoint(cloud, index);
   }, [cloud, index]);
 
-  const select = useCallback((next: number | null) => {
-    setIndex(next);
-  }, []);
+  const select = useCallback(
+    (next: number | null) => {
+      setPicked(next === null ? null : { cloud, index: next });
+    },
+    [cloud],
+  );
 
   const clear = useCallback(() => {
-    setIndex(null);
+    setPicked(null);
   }, []);
 
   return { index, point, select, clear };

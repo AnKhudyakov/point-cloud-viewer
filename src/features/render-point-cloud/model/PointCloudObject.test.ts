@@ -206,3 +206,57 @@ describe('picking against the drawn subset', () => {
     object.dispose();
   });
 });
+
+describe('resource ownership', () => {
+  const ramp = createRampTexture();
+
+  it('releases its geometry and its material exactly once', () => {
+    const object = new PointCloudObject(makeCloud(), ramp);
+    let geometries = 0;
+    let materials = 0;
+
+    object.points.geometry.addEventListener('dispose', () => {
+      geometries += 1;
+    });
+    object.points.material.addEventListener('dispose', () => {
+      materials += 1;
+    });
+
+    object.dispose();
+    object.dispose();
+    object.dispose();
+
+    expect(geometries).toBe(1);
+    expect(materials).toBe(1);
+  });
+
+  it('gives every cloud its own geometry and material', () => {
+    const first = new PointCloudObject(makeCloud(), ramp);
+    const second = new PointCloudObject(makeCloud(), ramp);
+
+    expect(second.points.geometry).not.toBe(first.points.geometry);
+    expect(second.points.material).not.toBe(first.points.material);
+
+    first.dispose();
+    second.dispose();
+  });
+
+  it('shares one ramp texture between clouds and outlives both of them', () => {
+    const first = new PointCloudObject(makeCloud(), ramp);
+    const second = new PointCloudObject(makeCloud(), ramp);
+
+    expect(first.points.material.uniforms.uRamp.value).toBe(ramp);
+    expect(second.points.material.uniforms.uRamp.value).toBe(ramp);
+
+    let rampDisposed = 0;
+    ramp.addEventListener('dispose', () => {
+      rampDisposed += 1;
+    });
+
+    first.dispose();
+    second.dispose();
+
+    // A resource shared by several objects must not go with the first of them.
+    expect(rampDisposed).toBe(0);
+  });
+});

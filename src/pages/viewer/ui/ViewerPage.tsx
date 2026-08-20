@@ -25,10 +25,8 @@ export function ViewerPage() {
   usePreventStrayDrop();
 
   const [source, setSource] = useState<CloudSource>(BUNDLED_SOURCE);
-  const { state, key, reload } = useCloudLoader(source);
-
-  const cloud = state.status === 'ready' ? state.cloud : null;
-  const { section, select } = useActiveSection(key, cloud !== null);
+  const { state, cloud, key, reload } = useCloudLoader(source);
+  const { section, select } = useActiveSection(key, state.status === 'ready');
   const isBundled = source.kind === 'url' && source.url === BUNDLED_DATASET.url;
 
   const tabs: TabItem[] = SECTIONS.map((id) => ({

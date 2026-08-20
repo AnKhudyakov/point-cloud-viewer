@@ -15,13 +15,17 @@ export type CloudState =
 
 const PENDING: CloudState = { status: 'loading', progress: undefined };
 
-export function useCloudLoader(source: CloudSource): {
+export interface CloudLoader {
   state: CloudState;
+  cloud: PointCloudData | null;
   key: string;
   reload: () => void;
-} {
+}
+
+export function useCloudLoader(source: CloudSource): CloudLoader {
   const [attempt, setAttempt] = useState(0);
   const [outcome, setOutcome] = useState<{ key: string; state: CloudState } | null>(null);
+  const [loaded, setLoaded] = useState<PointCloudData | null>(null);
 
   const key = `${sourceKey(source)}#${attempt}`;
   const state = outcome?.key === key ? outcome.state : PENDING;
@@ -40,6 +44,7 @@ export function useCloudLoader(source: CloudSource): {
       .then((cloud) => {
         if (!controller.signal.aborted) {
           setOutcome({ key, state: { status: 'ready', cloud } });
+          setLoaded(cloud);
         }
       })
       .catch((error: unknown) => {
@@ -62,5 +67,5 @@ export function useCloudLoader(source: CloudSource): {
     setAttempt((value) => value + 1);
   }, []);
 
-  return { state, key, reload };
+  return { state, cloud: loaded, key, reload };
 }

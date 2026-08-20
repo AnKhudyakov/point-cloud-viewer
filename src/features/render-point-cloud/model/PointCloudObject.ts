@@ -51,6 +51,8 @@ export class PointCloudObject {
 
   private drawn = 0;
 
+  private disposed = false;
+
   constructor(data: PointCloudData, ramp: Texture) {
     this.source = data;
     this.total = data.pointCount;
@@ -128,6 +130,11 @@ export class PointCloudObject {
   }
 
   dispose(): void {
+    if (this.disposed) {
+      return;
+    }
+    this.disposed = true;
+
     this.geometry.dispose();
     this.material.dispose();
   }

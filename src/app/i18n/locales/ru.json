@@ -67,7 +67,8 @@
     "pointsVisible": "Точек рисуется",
     "pointsTotal": "Точек загружено",
     "stride": "Отбор",
-    "everyPoint": "каждая точка"
+    "everyPoint": "каждая точка",
+    "gpuResources": "GPU геом / тек / прог"
   },
   "summary": {
     "title": "Загруженное облако",

@@ -22,6 +22,7 @@ export function RenderStatsPanel({ stats }: RenderStatsProps) {
       `${stats.drawn.toLocaleString(locale)} / ${stats.total.toLocaleString(locale)}`,
     ],
     [t('stats.stride'), stats.stride === 1 ? t('stats.everyPoint') : `1 / ${stats.stride}`],
+    [t('stats.gpuResources'), `${stats.geometries} / ${stats.textures} / ${stats.programs}`],
   ];
 
   return (

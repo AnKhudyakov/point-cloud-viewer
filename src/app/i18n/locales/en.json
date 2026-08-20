@@ -67,7 +67,8 @@
     "pointsVisible": "Points drawn",
     "pointsTotal": "Points loaded",
     "stride": "Sampling",
-    "everyPoint": "every point"
+    "everyPoint": "every point",
+    "gpuResources": "GPU geo / tex / prog"
   },
   "summary": {
     "title": "Loaded cloud",

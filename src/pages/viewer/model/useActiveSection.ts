@@ -7,11 +7,11 @@ interface ActiveSection {
   select: (section: Section) => void;
 }
 
-export function useActiveSection(loadKey: string, isReady: boolean): ActiveSection {
+export function useActiveSection(loadKey: string, isLoadFinished: boolean): ActiveSection {
   const [choice, setChoice] = useState<{ key: string; section: Section } | null>(null);
 
   const section: Section =
-    choice?.key === loadKey ? choice.section : isReady ? 'preview' : 'source';
+    choice?.key === loadKey ? choice.section : isLoadFinished ? 'preview' : 'source';
 
   return {
     section,

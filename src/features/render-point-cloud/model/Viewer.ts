@@ -13,6 +13,9 @@ export interface RenderStats {
   total: number;
   capacity: number;
   stride: number;
+  geometries: number;
+  textures: number;
+  programs: number;
 }
 
 export interface ViewerOptions {
@@ -303,12 +306,17 @@ export class Viewer {
       this.lastReportAt = performance.now();
     }
 
+    const memory = this.renderer.info.memory;
+
     this.onStats({
       fps: Math.round(this.fps),
       drawn: this.cloud.drawnCount,
       total: this.cloud.total,
       capacity: this.cloud.capacity,
       stride: this.stride,
+      geometries: memory.geometries,
+      textures: memory.textures,
+      programs: this.renderer.info.programs?.length ?? 0,
     });
   }
 }
