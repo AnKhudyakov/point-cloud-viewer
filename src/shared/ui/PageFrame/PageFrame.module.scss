@@ -1,0 +1,18 @@
+.shell {
+  display: grid;
+  grid-template-rows: $header-height 1fr auto;
+  height: 100%;
+}
+
+.main {
+  position: relative;
+  min-height: 0;
+  overflow: auto;
+}
+
+.footer {
+  padding: $space-xs $space-md;
+  border-top: 1px solid $color-border;
+  color: $color-text-muted;
+  font-size: 12px;
+}

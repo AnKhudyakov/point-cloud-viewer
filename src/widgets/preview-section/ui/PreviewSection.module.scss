@@ -1,0 +1,12 @@
+.section {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: $space-lg;
+}
+
+.empty {
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 13px;
+}

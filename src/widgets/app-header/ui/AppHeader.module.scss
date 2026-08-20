@@ -1,0 +1,49 @@
+.header {
+  display: flex;
+  align-items: stretch;
+  gap: $space-md;
+  padding: 0 $space-md;
+  border-bottom: 1px solid $color-border;
+  background: $color-surface;
+}
+
+.brand {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: $space-sm;
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tagline {
+  color: $color-text-muted;
+  font-size: 13px;
+
+  white-space: nowrap;
+}
+
+.nav {
+  display: flex;
+  align-items: stretch;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.trailing {
+  display: flex;
+  align-items: center;
+}
+
+@media (width <= 720px) {
+  .tagline {
+    display: none;
+  }
+}

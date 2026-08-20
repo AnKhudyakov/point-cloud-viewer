@@ -1,0 +1,62 @@
+.section {
+  display: grid;
+  gap: $space-lg;
+  align-content: start;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: $space-lg;
+}
+
+.heading {
+  margin: 0;
+  color: $color-text-muted;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.card {
+  display: grid;
+  gap: $space-sm;
+  justify-items: start;
+  padding: $space-lg;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: $color-surface;
+}
+
+.cardTitle {
+  font-weight: 600;
+}
+
+.cardMeta {
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 12px;
+}
+
+.cardDescription {
+  color: $color-text-muted;
+  font-size: 13px;
+}
+
+.button {
+  padding: $space-xs $space-md;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: transparent;
+  color: $color-text;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $color-accent;
+  }
+}
+
+.status {
+  display: grid;
+  justify-items: center;
+  min-height: 64px;
+}

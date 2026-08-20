@@ -1,0 +1,42 @@
+.tabs {
+  display: inline-flex;
+  gap: $space-xs;
+}
+
+.tab {
+  position: relative;
+  padding: $space-sm $space-md;
+  border: 0;
+  background: transparent;
+  color: $color-text-muted;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+
+  &::after {
+    position: absolute;
+    right: $space-sm;
+    bottom: 0;
+    left: $space-sm;
+    height: 2px;
+    background: transparent;
+    content: '';
+  }
+
+  &:hover:not(:disabled) {
+    color: $color-text;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+
+  &.active {
+    color: $color-text;
+
+    &::after {
+      background: $color-accent;
+    }
+  }
+}

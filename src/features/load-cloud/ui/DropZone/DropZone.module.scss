@@ -1,0 +1,59 @@
+.zone {
+  display: grid;
+  gap: $space-sm;
+  justify-items: start;
+  padding: $space-lg;
+  border: 1px dashed $color-border;
+  border-radius: $radius;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.over {
+  border-color: $color-accent;
+  background: rgba(88, 166, 255, 0.06);
+}
+
+.title {
+  color: $color-text;
+  font-weight: 600;
+}
+
+.hint {
+  color: $color-text-muted;
+  font-size: 13px;
+}
+
+.accepted {
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 12px;
+}
+
+.rejected {
+  color: #f0883e;
+  font-size: 13px;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.button {
+  padding: $space-xs $space-md;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: transparent;
+  color: $color-text;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $color-accent;
+  }
+}

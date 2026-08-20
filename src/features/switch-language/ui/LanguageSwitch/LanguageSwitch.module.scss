@@ -1,0 +1,26 @@
+.group {
+  display: inline-flex;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  overflow: hidden;
+}
+
+.button {
+  padding: $space-xs $space-sm;
+  border: 0;
+  background: transparent;
+  color: $color-text-muted;
+  font: inherit;
+  font-size: 12px;
+  text-transform: uppercase;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-text;
+  }
+
+  &.active {
+    background: $color-accent;
+    color: $color-bg;
+  }
+}

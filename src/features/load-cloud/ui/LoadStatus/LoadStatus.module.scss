@@ -1,0 +1,30 @@
+.block {
+  display: grid;
+  gap: $space-sm;
+  justify-items: center;
+  min-width: 260px;
+  color: $color-text-muted;
+}
+
+.message {
+  color: $color-text;
+}
+
+.detail {
+  font-family: $font-mono;
+  font-size: 13px;
+}
+
+.retry {
+  padding: $space-xs $space-md;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: transparent;
+  color: $color-text;
+  font: inherit;
+  cursor: pointer;
+
+  &:hover {
+    border-color: $color-accent;
+  }
+}

@@ -1,0 +1,16 @@
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+
+.vercel
+
+public/clouds/*.pcb
+
+TODO.md
