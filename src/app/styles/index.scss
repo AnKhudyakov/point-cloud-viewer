@@ -29,3 +29,18 @@ canvas {
 a {
   color: $color-accent;
 }
+
+.point-cloud-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  padding: 1px 6px;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: rgba(13, 17, 23, 0.92);
+  color: $color-text;
+  font-family: $font-mono;
+  font-size: 11px;
+  white-space: nowrap;
+  pointer-events: none;
+}

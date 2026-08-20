@@ -1,0 +1,46 @@
+.panel {
+  display: grid;
+  gap: $space-sm;
+}
+
+.rows {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px $space-sm;
+  margin: 0;
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 11px;
+}
+
+.row {
+  display: contents;
+}
+
+.value {
+  margin: 0;
+  color: $color-text;
+  text-align: right;
+}
+
+.hint {
+  margin: 0;
+  color: $color-text-muted;
+  font-size: 11px;
+}
+
+.clear {
+  padding: 2px $space-sm;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  background: transparent;
+  color: $color-text;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  justify-self: start;
+
+  &:hover {
+    border-color: $color-accent;
+  }
+}

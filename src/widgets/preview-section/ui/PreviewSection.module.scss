@@ -69,14 +69,27 @@
   align-self: flex-end;
 }
 
-.footerHint {
+.bottomBar {
   position: absolute;
   bottom: $space-md;
   left: 50%;
-  color: $color-text-muted;
-  font-size: 11px;
+  display: grid;
+  gap: $space-xs;
+  justify-items: center;
   transform: translateX(-50%);
   pointer-events: none;
+}
+
+.hint {
+  color: $color-text-muted;
+  font-size: 11px;
+}
+
+.toolbar {
+  display: flex;
+  gap: $space-sm;
+  align-items: center;
+  pointer-events: auto;
 }
 
 .action {

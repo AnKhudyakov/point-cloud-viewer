@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import { type CloudSource, type PointCloudData, sourceName } from '@/entities/point-cloud';
 import { ScalarLegend, ScalarRangeControl, useScalarRange } from '@/features/color-by-scalar';
+import { MeasurementPanel, useMeasurement } from '@/features/measure-distance';
 import { PickedPointPanel, usePickedPoint } from '@/features/pick-point';
 import { PointBudgetControl, usePointBudget } from '@/features/point-budget';
 import {
@@ -10,9 +11,11 @@ import {
   type RenderStats,
   RenderStatsPanel,
   SAMPLE_CAPACITY,
+  ScaleBar,
 } from '@/features/render-point-cloud';
 
 import { CloudSummary } from './CloudSummary';
+import { type ClickMode, ModeSwitch } from './ModeSwitch';
 import styles from './PreviewSection.module.scss';
 
 interface PreviewSectionProps {
@@ -36,8 +39,28 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
   const capacity = Math.min(cloud.pointCount, SAMPLE_CAPACITY);
   const budget = usePointBudget(capacity);
   const picked = usePickedPoint(cloud);
+  const measurement = useMeasurement(cloud);
+  const [mode, setMode] = useState<ClickMode>('inspect');
   const [stats, setStats] = useState<RenderStats | null>(null);
   const [resetToken, setResetToken] = useState(0);
+
+  const unit = t('scalar.unit');
+
+  const handlePick = (index: number | null) => {
+    picked.select(index);
+    if (mode === 'measure') {
+      measurement.add(index);
+    }
+  };
+
+  const line =
+    measurement.from && measurement.to && measurement.segment
+      ? {
+          from: measurement.from.local,
+          to: measurement.to.local,
+          text: `${measurement.segment.distance.toFixed(2)} ${unit}`,
+        }
+      : null;
 
   return (
     <div className={styles.section}>
@@ -46,9 +69,10 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
         scalarRange={scalar.range}
         budget={budget.budget}
         selected={picked.index}
+        measurement={line}
         resetToken={resetToken}
         onStats={setStats}
-        onPick={picked.select}
+        onPick={handlePick}
       />
 
       <div className={styles.overlay}>
@@ -57,13 +81,16 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
         </div>
 
         <div className={styles.sidebar}>
-          <button
-            type="button"
-            className={styles.action}
-            onClick={() => setResetToken((value) => value + 1)}
-          >
-            {t('preview.resetView')}
-          </button>
+          <div className={styles.toolbar}>
+            <ModeSwitch mode={mode} onChange={setMode} />
+            <button
+              type="button"
+              className={styles.action}
+              onClick={() => setResetToken((value) => value + 1)}
+            >
+              {t('preview.resetView')}
+            </button>
+          </div>
 
           <div className={styles.panel}>
             <section className={styles.group}>
@@ -79,23 +106,27 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
 
             <section className={styles.group}>
               <h3 className={styles.groupTitle}>{t('scalar.title')}</h3>
-              <ScalarLegend range={scalar.range} unit={t('scalar.unit')} />
+              <ScalarLegend range={scalar.range} unit={unit} />
               <ScalarRangeControl state={scalar} />
             </section>
 
             <section className={styles.group}>
+              <h3 className={styles.groupTitle}>{t('measure.title')}</h3>
+              <MeasurementPanel state={measurement} unit={unit} />
+            </section>
+
+            <section className={styles.group}>
               <h3 className={styles.groupTitle}>{t('pick.title')}</h3>
-              <PickedPointPanel
-                point={picked.point}
-                unit={t('scalar.unit')}
-                onClear={picked.clear}
-              />
+              <PickedPointPanel point={picked.point} unit={unit} onClear={picked.clear} />
             </section>
           </div>
         </div>
       </div>
 
-      <span className={styles.footerHint}>{t('preview.hint')}</span>
+      <div className={styles.bottomBar}>
+        {stats && <ScaleBar meters={stats.scaleMeters} pixels={stats.scalePixels} unit={unit} />}
+        <span className={styles.hint}>{t('preview.hint')}</span>
+      </div>
     </div>
   );
 }

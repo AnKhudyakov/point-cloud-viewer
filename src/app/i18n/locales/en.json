@@ -21,6 +21,22 @@
     "en": "English",
     "ru": "Russian"
   },
+  "measure": {
+    "title": "Measure",
+    "mode": "Measure mode",
+    "hintFirst": "Click the first point",
+    "hintSecond": "Click the second point",
+    "distance": "distance",
+    "horizontal": "horizontal",
+    "vertical": "rise",
+    "slope": "slope",
+    "clear": "Clear measurement"
+  },
+  "mode": {
+    "label": "Click action",
+    "inspect": "Inspect",
+    "measure": "Measure"
+  },
   "pick": {
     "title": "Picked point",
     "hint": "Click a point to inspect it",

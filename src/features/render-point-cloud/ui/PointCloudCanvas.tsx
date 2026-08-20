@@ -1,15 +1,23 @@
 import { useEffect, useRef } from 'react';
+import { Vector3 } from 'three';
 
 import type { PointCloudData } from '@/entities/point-cloud';
 
 import { type RenderStats, Viewer } from '../model/Viewer';
 import styles from './PointCloudCanvas.module.scss';
 
+export interface CanvasMeasurement {
+  from: readonly [number, number, number];
+  to: readonly [number, number, number];
+  text: string;
+}
+
 interface PointCloudCanvasProps {
   cloud: PointCloudData;
   scalarRange: readonly [number, number];
   budget: number;
   selected: number | null;
+  measurement: CanvasMeasurement | null;
   resetToken: number;
   onStats: (stats: RenderStats) => void;
   onPick: (sourceIndex: number | null) => void;
@@ -20,6 +28,7 @@ export function PointCloudCanvas({
   scalarRange,
   budget,
   selected,
+  measurement,
   resetToken,
   onStats,
   onPick,
@@ -67,6 +76,18 @@ export function PointCloudCanvas({
   useEffect(() => {
     viewerRef.current?.setSelection(selected);
   }, [selected]);
+
+  useEffect(() => {
+    viewerRef.current?.setMeasurement(
+      measurement === null
+        ? null
+        : {
+            from: new Vector3(...measurement.from),
+            to: new Vector3(...measurement.to),
+            text: measurement.text,
+          },
+    );
+  }, [measurement]);
 
   useEffect(() => {
     if (resetToken > 0) {

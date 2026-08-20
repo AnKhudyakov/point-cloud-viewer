@@ -4,11 +4,14 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { type PointCloudData, slotForSource, sourceIndexFor } from '@/entities/point-cloud';
 
 import { frameBounds } from '../lib/frameBounds';
+import { MeasurementOverlay, type MeasurementView } from './MeasurementOverlay';
 import { createRampTexture, projectionScale } from './pointCloudMaterial';
 import { PointCloudObject } from './PointCloudObject';
 
 export interface RenderStats {
   fps: number;
+  scaleMeters: number;
+  scalePixels: number;
   drawn: number;
   total: number;
   capacity: number;
@@ -43,6 +46,8 @@ export class Viewer {
   private readonly controls: OrbitControls;
 
   private readonly ramp = createRampTexture();
+
+  private readonly overlay: MeasurementOverlay;
 
   private readonly observer: ResizeObserver;
 
@@ -97,6 +102,9 @@ export class Viewer {
     this.controls.dampingFactor = 0.12;
     this.controls.screenSpacePanning = false;
 
+    this.overlay = new MeasurementOverlay(container);
+    this.scene.add(this.overlay.line);
+
     this.canvas.addEventListener('pointerdown', this.handlePointerDown);
     this.canvas.addEventListener('pointerup', this.handlePointerUp);
 
@@ -118,6 +126,10 @@ export class Viewer {
 
     this.resetView();
     this.reportStats(true);
+  }
+
+  setMeasurement(view: MeasurementView | null): void {
+    this.overlay.set(view);
   }
 
   setSelection(sourceIndex: number | null): void {
@@ -187,6 +199,9 @@ export class Viewer {
 
     this.clearCloud();
 
+    this.scene.remove(this.overlay.line);
+    this.overlay.dispose();
+
     this.ramp.dispose();
     this.renderer.dispose();
     this.renderer.forceContextLoss();
@@ -228,6 +243,7 @@ export class Viewer {
     this.frame = requestAnimationFrame(this.loop);
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+    this.overlay.update(this.camera, this.container.clientWidth, this.container.clientHeight);
     this.measure();
   };
 
@@ -307,9 +323,16 @@ export class Viewer {
     }
 
     const memory = this.renderer.info.memory;
+    const bar = this.overlay.scaleBar(
+      this.camera.position.distanceTo(this.controls.target),
+      FIELD_OF_VIEW,
+      this.container.clientHeight,
+    );
 
     this.onStats({
       fps: Math.round(this.fps),
+      scaleMeters: bar.meters,
+      scalePixels: bar.pixels,
       drawn: this.cloud.drawnCount,
       total: this.cloud.total,
       capacity: this.cloud.capacity,

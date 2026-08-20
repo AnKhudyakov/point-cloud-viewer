@@ -1,0 +1,25 @@
+.group {
+  display: inline-flex;
+  border: 1px solid $color-border;
+  border-radius: $radius;
+  overflow: hidden;
+}
+
+.option {
+  padding: 2px $space-sm;
+  border: 0;
+  background: transparent;
+  color: $color-text-muted;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+
+  &:hover {
+    color: $color-text;
+  }
+
+  &.active {
+    background: $color-accent;
+    color: $color-bg;
+  }
+}

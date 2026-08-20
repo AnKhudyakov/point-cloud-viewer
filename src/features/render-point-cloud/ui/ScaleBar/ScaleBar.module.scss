@@ -1,0 +1,15 @@
+.scale {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 11px;
+}
+
+.bar {
+  height: 6px;
+  border-right: 1px solid currentcolor;
+  border-bottom: 1px solid currentcolor;
+  border-left: 1px solid currentcolor;
+}
