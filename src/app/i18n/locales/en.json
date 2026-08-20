@@ -21,6 +21,15 @@
     "en": "English",
     "ru": "Russian"
   },
+  "pick": {
+    "title": "Picked point",
+    "hint": "Click a point to inspect it",
+    "index": "index",
+    "dataset": "dataset xyz",
+    "local": "local xyz",
+    "scalar": "scalar",
+    "clear": "Clear selection"
+  },
   "preview": {
     "empty": "Load a cloud first.",
     "resetView": "Reset view",

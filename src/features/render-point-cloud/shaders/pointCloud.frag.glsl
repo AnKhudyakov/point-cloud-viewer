@@ -1,12 +1,17 @@
 precision mediump float;
 
+uniform vec3 uHighlightRing;
+
 varying vec3 vColor;
+varying float vSelected;
 
 void main() {
   vec2 offset = gl_PointCoord - vec2(0.5);
-  if (dot(offset, offset) > 0.25) {
+  float radiusSquared = dot(offset, offset);
+  if (radiusSquared > 0.25) {
     discard;
   }
 
-  gl_FragColor = vec4(vColor, 1.0);
+  vec3 marker = mix(vColor, uHighlightRing, step(0.09, radiusSquared));
+  gl_FragColor = vec4(mix(vColor, marker, vSelected), 1.0);
 }

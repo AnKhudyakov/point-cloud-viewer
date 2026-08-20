@@ -1,4 +1,5 @@
 import {
+  Color,
   DataTexture,
   RGBAFormat,
   ShaderMaterial,
@@ -14,6 +15,12 @@ import vertexShader from '../shaders/pointCloud.vert.glsl?raw';
 
 export const MIN_PIXEL_SIZE = 1;
 export const MAX_PIXEL_SIZE = 24;
+
+export const NO_SELECTION = -1;
+export const HIGHLIGHT_COLOR = 0xffffff;
+export const HIGHLIGHT_RING_COLOR = 0x0d1117;
+export const HIGHLIGHT_SCALE = 2.5;
+export const HIGHLIGHT_MIN_SIZE = 14;
 
 export function createRampTexture(): DataTexture {
   const texture = new DataTexture(
@@ -46,6 +53,11 @@ export function createPointCloudMaterial({
       uProjectionScale: { value: 1 },
       uMinPixelSize: { value: MIN_PIXEL_SIZE },
       uMaxPixelSize: { value: MAX_PIXEL_SIZE },
+      uSelected: { value: NO_SELECTION },
+      uHighlight: { value: new Color(HIGHLIGHT_COLOR) },
+      uHighlightRing: { value: new Color(HIGHLIGHT_RING_COLOR) },
+      uHighlightScale: { value: HIGHLIGHT_SCALE },
+      uHighlightMinSize: { value: HIGHLIGHT_MIN_SIZE },
     },
     vertexShader,
     fragmentShader,

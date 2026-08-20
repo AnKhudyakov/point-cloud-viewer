@@ -47,3 +47,17 @@ export function sampleByStride(
 
   return written;
 }
+
+export function sourceIndexFor(slot: number, stride: number): number {
+  return slot * stride;
+}
+
+export function slotForSource(sourceIndex: number, stride: number): number | null {
+  if (sourceIndex < 0 || stride <= 0) {
+    return null;
+  }
+  if (sourceIndex % stride !== 0) {
+    return null;
+  }
+  return sourceIndex / stride;
+}

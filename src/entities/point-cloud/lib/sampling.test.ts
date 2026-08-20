@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { sampleByStride, sampledCount, strideFor } from './sampling';
+import { sampleByStride, sampledCount, slotForSource, sourceIndexFor, strideFor } from './sampling';
 
 describe('strideFor', () => {
   it('draws everything when the budget covers the cloud', () => {
@@ -106,5 +106,46 @@ describe('sampleByStride', () => {
     sampleByStride(positions, new Float32Array(9), 3, 3, 2);
 
     expect([...positions]).toEqual([...copy]);
+  });
+});
+
+describe('sourceIndexFor and slotForSource', () => {
+  it('round trips a drawn slot back to the point it came from', () => {
+    for (const stride of [1, 2, 7, 100]) {
+      for (const slot of [0, 1, 5, 123]) {
+        expect(slotForSource(sourceIndexFor(slot, stride), stride)).toBe(slot);
+      }
+    }
+  });
+
+  it('maps a slot to the point the sampler copied into it', () => {
+    // The sampler writes source point 0, 10, 20 into slots 0, 1, 2.
+    expect(sourceIndexFor(0, 10)).toBe(0);
+    expect(sourceIndexFor(1, 10)).toBe(10);
+    expect(sourceIndexFor(2, 10)).toBe(20);
+  });
+
+  it('reports that a point is not drawn when the stride skips it', () => {
+    expect(slotForSource(5, 10)).toBeNull();
+    expect(slotForSource(11, 10)).toBeNull();
+  });
+
+  it('keeps every point drawn at stride one', () => {
+    for (const index of [0, 1, 999]) {
+      expect(slotForSource(index, 1)).toBe(index);
+    }
+  });
+
+  it('rejects a negative index and a broken stride', () => {
+    expect(slotForSource(-1, 10)).toBeNull();
+    expect(slotForSource(10, 0)).toBeNull();
+  });
+
+  it('survives a budget change: a point on the new stride keeps its selection', () => {
+    const source = sourceIndexFor(30, 4);
+
+    expect(source).toBe(120);
+    expect(slotForSource(source, 8)).toBe(15);
+    expect(slotForSource(source, 7)).toBeNull();
   });
 });

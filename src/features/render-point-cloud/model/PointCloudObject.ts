@@ -16,7 +16,7 @@ import {
   strideFor,
 } from '@/entities/point-cloud';
 
-import { autoPointSize, createPointCloudMaterial } from './pointCloudMaterial';
+import { autoPointSize, createPointCloudMaterial, NO_SELECTION } from './pointCloudMaterial';
 
 export const SAMPLE_CAPACITY = 8_000_000;
 
@@ -43,6 +43,8 @@ export class PointCloudObject {
 
   private readonly scalars: BufferAttribute;
 
+  private readonly slots: BufferAttribute;
+
   private readonly positionData: Float32Array;
 
   private readonly scalarData: Float32Array;
@@ -59,9 +61,16 @@ export class PointCloudObject {
     this.positions = new BufferAttribute(this.positionData, 3);
     this.scalars = new BufferAttribute(this.scalarData, 1);
 
+    const slotData = new Float32Array(this.capacity);
+    for (let i = 0; i < this.capacity; i += 1) {
+      slotData[i] = i;
+    }
+    this.slots = new BufferAttribute(slotData, 1);
+
     this.geometry = new BufferGeometry();
     this.geometry.setAttribute('position', this.positions);
     this.geometry.setAttribute('scalar', this.scalars);
+    this.geometry.setAttribute('slot', this.slots);
     this.geometry.boundingBox = data.bounds.clone();
     this.geometry.boundingSphere = data.bounds.getBoundingSphere(new Sphere());
 
@@ -96,6 +105,10 @@ export class PointCloudObject {
 
   get drawnCount(): number {
     return this.drawn;
+  }
+
+  setSelectedSlot(slot: number | null): void {
+    this.material.uniforms.uSelected.value = slot ?? NO_SELECTION;
   }
 
   setScalarRange(min: number, max: number): void {

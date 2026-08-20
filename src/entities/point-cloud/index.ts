@@ -31,7 +31,14 @@ export {
   sampleRamp,
 } from './lib/colormap';
 export { decodePointCloud, toAbsolute } from './lib/decode';
-export { sampleByStride, sampledCount, strideFor } from './lib/sampling';
+export { describePoint, type PointInfo } from './lib/pointInfo';
+export {
+  sampleByStride,
+  sampledCount,
+  slotForSource,
+  sourceIndexFor,
+  strideFor,
+} from './lib/sampling';
 export {
   BINARY_EXTENSION,
   type CloudSource,

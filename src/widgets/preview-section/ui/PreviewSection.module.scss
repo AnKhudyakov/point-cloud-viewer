@@ -23,10 +23,21 @@
   pointer-events: none;
 }
 
+.sidebar {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: $space-sm;
+  justify-items: end;
+  max-height: 100%;
+}
+
 .panel {
   display: grid;
   gap: $space-lg;
+  align-content: start;
+  min-height: 0;
   padding: $space-md;
+  overflow-y: auto;
   border: 1px solid $color-border;
   border-radius: $radius;
   background: rgba(22, 27, 34, 0.88);
@@ -60,10 +71,11 @@
 
 .footerHint {
   position: absolute;
-  right: $space-md;
   bottom: $space-md;
+  left: 50%;
   color: $color-text-muted;
   font-size: 11px;
+  transform: translateX(-50%);
   pointer-events: none;
 }
 

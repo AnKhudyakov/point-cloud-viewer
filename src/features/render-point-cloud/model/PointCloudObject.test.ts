@@ -1,7 +1,7 @@
-import { Box3, type BufferAttribute, Vector3 } from 'three';
+import { Box3, type BufferAttribute, Raycaster, Vector3 } from 'three';
 import { beforeEach, describe, expect, it } from 'vitest';
 
-import type { PointCloudData } from '@/entities/point-cloud';
+import { type PointCloudData, sourceIndexFor } from '@/entities/point-cloud';
 
 import { createRampTexture } from './pointCloudMaterial';
 import { PointCloudObject } from './PointCloudObject';
@@ -139,5 +139,70 @@ describe('PointCloudObject', () => {
     object.dispose();
 
     expect(disposed).toBe(false);
+  });
+});
+
+describe('picking against the drawn subset', () => {
+  const ramp = createRampTexture();
+
+  /** Points on a line along X, one meter apart, so a ray can target one exactly. */
+  function lineCloud(total: number): PointCloudData {
+    const positions = new Float32Array(total * 3);
+    const scalars = new Float32Array(total);
+
+    for (let i = 0; i < total; i += 1) {
+      positions[i * 3] = i;
+      scalars[i] = i;
+    }
+
+    return {
+      origin: [0, 0, 0],
+      positions,
+      scalars,
+      pointCount: total,
+      bounds: new Box3(new Vector3(0, 0, 0), new Vector3(total, 0, 0)),
+      scalarRange: [0, total - 1],
+    };
+  }
+
+  function shootAt(object: PointCloudObject, x: number): number | undefined {
+    const raycaster = new Raycaster();
+    raycaster.params.Points.threshold = 0.4;
+    raycaster.set(new Vector3(x, 0, 10), new Vector3(0, 0, -1));
+    object.points.updateMatrixWorld(true);
+
+    return raycaster.intersectObject(object.points, false)[0]?.index;
+  }
+
+  it('hits a drawn point and the slot maps back to the source point', () => {
+    const object = new PointCloudObject(lineCloud(100), ramp);
+    object.applyBudget(10);
+
+    const slot = shootAt(object, 20);
+
+    expect(slot).toBe(2);
+    expect(sourceIndexFor(slot as number, 10)).toBe(20);
+    object.dispose();
+  });
+
+  it('never returns a point left in the buffer beyond the draw range', () => {
+    const object = new PointCloudObject(lineCloud(100), ramp);
+
+    // The full pass filled slot 15 with source point 15.
+    expect(shootAt(object, 15)).toBe(15);
+
+    // After the budget drops, slot 15 is outside the draw range and its stale
+    // contents must not be pickable, even though the bytes are still there.
+    object.applyBudget(10);
+    expect(shootAt(object, 15)).toBeUndefined();
+
+    object.dispose();
+  });
+
+  it('picks nothing where the cloud has no point', () => {
+    const object = new PointCloudObject(lineCloud(100), ramp);
+
+    expect(shootAt(object, 50.5)).toBeUndefined();
+    object.dispose();
   });
 });
