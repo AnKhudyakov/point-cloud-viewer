@@ -7,9 +7,23 @@ import { frameBounds } from '../lib/frameBounds';
 import { createRampTexture, projectionScale } from './pointCloudMaterial';
 import { PointCloudObject } from './PointCloudObject';
 
+export interface RenderStats {
+  fps: number;
+  drawn: number;
+  total: number;
+  capacity: number;
+  stride: number;
+}
+
+export interface ViewerOptions {
+  onStats?: (stats: RenderStats) => void;
+}
+
 export const CANVAS_CLASS = 'point-cloud-canvas';
 
 const FIELD_OF_VIEW = 55;
+const STATS_INTERVAL_MS = 250;
+const FPS_SMOOTHING = 0.1;
 const BACKGROUND = 0x0d1117;
 const MAX_PIXEL_RATIO = 2;
 
@@ -32,12 +46,23 @@ export class Viewer {
 
   private disposed = false;
 
+  private readonly onStats: ((stats: RenderStats) => void) | undefined;
+
+  private stride = 1;
+
+  private fps = 0;
+
+  private lastFrameAt = 0;
+
+  private lastReportAt = 0;
+
   private readonly container: HTMLElement;
 
   private readonly canvas: HTMLCanvasElement;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, options: ViewerOptions = {}) {
     this.container = container;
+    this.onStats = options.onStats;
 
     this.canvas = document.createElement('canvas');
     this.canvas.className = CANVAS_CLASS;
@@ -68,8 +93,24 @@ export class Viewer {
     this.cloud = new PointCloudObject(data, this.ramp);
     this.scene.add(this.cloud.points);
     this.cloud.setProjectionScale(this.currentProjectionScale());
+    this.stride = 1;
 
     this.resetView();
+    this.reportStats(true);
+  }
+
+  setBudget(budget: number): void {
+    if (!this.cloud) {
+      return;
+    }
+
+    const result = this.cloud.applyBudget(budget);
+    this.stride = result.stride;
+    this.reportStats(true);
+  }
+
+  get capacity(): number {
+    return this.cloud?.capacity ?? 0;
   }
 
   setScalarRange(min: number, max: number): void {
@@ -158,5 +199,42 @@ export class Viewer {
     this.frame = requestAnimationFrame(this.loop);
     this.controls.update();
     this.renderer.render(this.scene, this.camera);
+    this.measure();
   };
+
+  private measure(): void {
+    const now = performance.now();
+
+    if (this.lastFrameAt > 0) {
+      const delta = now - this.lastFrameAt;
+      if (delta > 0) {
+        const instant = 1000 / delta;
+        this.fps =
+          this.fps === 0 ? instant : this.fps * (1 - FPS_SMOOTHING) + instant * FPS_SMOOTHING;
+      }
+    }
+    this.lastFrameAt = now;
+
+    if (now - this.lastReportAt >= STATS_INTERVAL_MS) {
+      this.lastReportAt = now;
+      this.reportStats(false);
+    }
+  }
+
+  private reportStats(force: boolean): void {
+    if (!this.onStats || !this.cloud) {
+      return;
+    }
+    if (force) {
+      this.lastReportAt = performance.now();
+    }
+
+    this.onStats({
+      fps: Math.round(this.fps),
+      drawn: this.cloud.drawnCount,
+      total: this.cloud.total,
+      capacity: this.cloud.capacity,
+      stride: this.stride,
+    });
+  }
 }

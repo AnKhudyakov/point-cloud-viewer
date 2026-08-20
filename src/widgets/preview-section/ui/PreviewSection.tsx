@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next';
 
 import { type CloudSource, type PointCloudData, sourceName } from '@/entities/point-cloud';
 import { ScalarLegend, ScalarRangeControl, useScalarRange } from '@/features/color-by-scalar';
-import { PointCloudCanvas } from '@/features/render-point-cloud';
+import { PointBudgetControl, usePointBudget } from '@/features/point-budget';
+import {
+  PointCloudCanvas,
+  type RenderStats,
+  RenderStatsPanel,
+  SAMPLE_CAPACITY,
+} from '@/features/render-point-cloud';
 
 import { CloudSummary } from './CloudSummary';
 import styles from './PreviewSection.module.scss';
@@ -24,13 +30,22 @@ export function PreviewSection({ cloud, source }: PreviewSectionProps) {
 }
 
 function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: CloudSource }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const scalar = useScalarRange(cloud.scalarRange);
+  const capacity = Math.min(cloud.pointCount, SAMPLE_CAPACITY);
+  const budget = usePointBudget(capacity);
+  const [stats, setStats] = useState<RenderStats | null>(null);
   const [resetToken, setResetToken] = useState(0);
 
   return (
     <div className={styles.section}>
-      <PointCloudCanvas cloud={cloud} scalarRange={scalar.range} resetToken={resetToken} />
+      <PointCloudCanvas
+        cloud={cloud}
+        scalarRange={scalar.range}
+        budget={budget.budget}
+        resetToken={resetToken}
+        onStats={setStats}
+      />
 
       <div className={styles.overlay}>
         <div className={styles.summarySlot}>
@@ -38,9 +53,23 @@ function LoadedPreview({ cloud, source }: { cloud: PointCloudData; source: Cloud
         </div>
 
         <div className={styles.panel}>
-          <h3 className={styles.panelTitle}>{t('scalar.title')}</h3>
-          <ScalarLegend range={scalar.range} unit={t('scalar.unit')} />
-          <ScalarRangeControl state={scalar} />
+          <section className={styles.group}>
+            <h3 className={styles.groupTitle}>{t('budget.title')}</h3>
+            <PointBudgetControl state={budget} />
+            <RenderStatsPanel stats={stats} />
+            {capacity < cloud.pointCount && (
+              <p className={styles.note}>
+                {t('budget.capped', { capacity: capacity.toLocaleString(i18n.resolvedLanguage) })}
+              </p>
+            )}
+          </section>
+
+          <section className={styles.group}>
+            <h3 className={styles.groupTitle}>{t('scalar.title')}</h3>
+            <ScalarLegend range={scalar.range} unit={t('scalar.unit')} />
+            <ScalarRangeControl state={scalar} />
+          </section>
+
           <button
             type="button"
             className={styles.action}

@@ -25,7 +25,7 @@
 
 .panel {
   display: grid;
-  gap: $space-md;
+  gap: $space-lg;
   padding: $space-md;
   border: 1px solid $color-border;
   border-radius: $radius;
@@ -33,13 +33,25 @@
   pointer-events: auto;
 }
 
-.panelTitle {
+.group {
+  display: grid;
+  gap: $space-sm;
+}
+
+.groupTitle {
   margin: 0;
   color: $color-text-muted;
   font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+}
+
+.note {
+  margin: 0;
+  max-width: 200px;
+  color: $color-text-muted;
+  font-size: 11px;
 }
 
 .summarySlot {

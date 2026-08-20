@@ -1,0 +1,22 @@
+.control {
+  display: grid;
+  gap: $space-sm;
+}
+
+.slider {
+  width: 100%;
+  accent-color: $color-accent;
+}
+
+.readout {
+  display: flex;
+  justify-content: space-between;
+  gap: $space-sm;
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 11px;
+}
+
+.value {
+  color: $color-text;
+}

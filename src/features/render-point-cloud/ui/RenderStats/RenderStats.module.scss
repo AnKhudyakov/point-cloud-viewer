@@ -1,0 +1,13 @@
+.stats {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 2px $space-sm;
+  color: $color-text-muted;
+  font-family: $font-mono;
+  font-size: 11px;
+}
+
+.value {
+  color: $color-text;
+  text-align: right;
+}

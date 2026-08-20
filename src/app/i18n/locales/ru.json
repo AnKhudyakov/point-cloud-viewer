@@ -4,6 +4,12 @@
     "tagline": "Рендер облаков точек в браузере",
     "sourceCode": "Исходный код"
   },
+  "budget": {
+    "title": "Бюджет точек",
+    "label": "Максимум точек",
+    "capped": "Ограничено {{capacity}} точками в одном буфере",
+    "full": "Всё облако"
+  },
   "data": {
     "loading": "Загрузка {{percent}}%",
     "loadingUnknown": "Загрузка",
@@ -49,8 +55,10 @@
   },
   "stats": {
     "fps": "FPS",
-    "pointsVisible": "Точек показано",
-    "pointsTotal": "Точек загружено"
+    "pointsVisible": "Точек рисуется",
+    "pointsTotal": "Точек загружено",
+    "stride": "Отбор",
+    "everyPoint": "каждая точка"
   },
   "summary": {
     "title": "Загруженное облако",

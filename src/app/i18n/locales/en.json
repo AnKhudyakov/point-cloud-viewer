@@ -4,6 +4,12 @@
     "tagline": "Browser point cloud rendering",
     "sourceCode": "Source code"
   },
+  "budget": {
+    "title": "Point budget",
+    "label": "Maximum points",
+    "capped": "Capped at {{capacity}} points drawn in one buffer",
+    "full": "Full cloud"
+  },
   "data": {
     "loading": "Loading {{percent}}%",
     "loadingUnknown": "Loading",
@@ -49,8 +55,10 @@
   },
   "stats": {
     "fps": "FPS",
-    "pointsVisible": "Points shown",
-    "pointsTotal": "Points loaded"
+    "pointsVisible": "Points drawn",
+    "pointsTotal": "Points loaded",
+    "stride": "Sampling",
+    "everyPoint": "every point"
   },
   "summary": {
     "title": "Loaded cloud",

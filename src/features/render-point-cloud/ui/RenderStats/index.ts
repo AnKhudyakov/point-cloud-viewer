@@ -1,0 +1,1 @@
+export { RenderStatsPanel } from './RenderStats';
