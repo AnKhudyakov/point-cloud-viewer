@@ -3,11 +3,6 @@ import { describe, expect, it } from 'vitest';
 
 import { metersPerPixel, projectToScreen } from './project';
 
-/**
- * A Z up camera standing south of the origin and looking north, the way the
- * viewer sets one up. Looking straight down the Z axis would put `up` parallel
- * to the view direction, where the orientation is undefined.
- */
 function zUpCamera(fov = 55, aspect = 2, distance = 100): PerspectiveCamera {
   const camera = new PerspectiveCamera(fov, aspect, 0.1, 1000);
   camera.up.set(0, 0, 1);

@@ -36,8 +36,6 @@ export function useClipSection(cloud: PointCloudData): ClipSectionState {
     return [low[axis], high[axis]];
   }, [cloud, settings.axis]);
 
-  // The cut is kept as a fraction of the extent, so switching axis keeps it
-  // roughly where the user left it instead of jumping outside the cloud.
   const position = min + (max - min) * settings.offset;
   const plane = clipPlaneFor(settings.axis, position, settings.flipped);
 

@@ -86,7 +86,6 @@ describe('PointCloudObject', () => {
 
     object.applyBudget(100);
 
-    // needsUpdate is a write only setter in three, version is what it moves.
     expect(positions.version).toBeGreaterThan(version);
     expect(positions.updateRanges).toEqual([{ start: 0, count: 300 }]);
   });
@@ -145,7 +144,6 @@ describe('PointCloudObject', () => {
 describe('picking against the drawn subset', () => {
   const ramp = createRampTexture();
 
-  /** Points on a line along X, one meter apart, so a ray can target one exactly. */
   function lineCloud(total: number): PointCloudData {
     const positions = new Float32Array(total * 3);
     const scalars = new Float32Array(total);
@@ -188,11 +186,8 @@ describe('picking against the drawn subset', () => {
   it('never returns a point left in the buffer beyond the draw range', () => {
     const object = new PointCloudObject(lineCloud(100), ramp);
 
-    // The full pass filled slot 15 with source point 15.
     expect(shootAt(object, 15)).toBe(15);
 
-    // After the budget drops, slot 15 is outside the draw range and its stale
-    // contents must not be pickable, even though the bytes are still there.
     object.applyBudget(10);
     expect(shootAt(object, 15)).toBeUndefined();
 
@@ -256,7 +251,6 @@ describe('resource ownership', () => {
     first.dispose();
     second.dispose();
 
-    // A resource shared by several objects must not go with the first of them.
     expect(rampDisposed).toBe(0);
   });
 });

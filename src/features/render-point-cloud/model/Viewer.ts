@@ -139,14 +139,6 @@ export class Viewer {
     this.callbacks = callbacks;
   }
 
-  /**
-   * Brings the scene in line with the state React describes.
-   *
-   * Called after every render and does nothing when nothing moved, which is why
-   * the React side needs no effect per control. Loading a cloud resets the
-   * object's budget, selection and uniforms, so a cloud change re-applies
-   * everything that hangs off it rather than leaving the two sides disagreeing.
-   */
   apply(next: SceneState): void {
     const changed = sceneChanges(this.applied, next);
 
@@ -287,7 +279,6 @@ export class Viewer {
     this.cloud?.setProjectionScale(this.currentProjectionScale());
   }
 
-  /** Frames the plan camera on the cloud, looking straight down the Z axis. */
   private updatePlanCamera(): void {
     const rect = this.planViewport;
     const bounds = this.cloud?.points.geometry.boundingBox;
@@ -385,10 +376,6 @@ export class Viewer {
     onPick(slot === undefined ? null : sourceIndexFor(slot, this.stride));
   }
 
-  /**
-   * One context, two viewports. The scissor test keeps each pass, including its
-   * clear, inside its own half of the canvas.
-   */
   private draw(): void {
     const height = this.container.clientHeight;
     const plan = this.planViewport;

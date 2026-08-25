@@ -10,16 +10,6 @@ export interface SplitViewports {
   plan: Rect | null;
 }
 
-/**
- * Splits the canvas between the perspective view and the plan view.
- *
- * Both views share one WebGL context and one canvas, drawn through two
- * viewports with the scissor test on. A second renderer would mean a second
- * context, and a browser only grants a handful of those.
- *
- * Rect coordinates are top left based, as the DOM measures them. The renderer
- * wants bottom left, which `toGlViewport` converts.
- */
 export function splitViewports(
   width: number,
   height: number,
@@ -53,7 +43,6 @@ export function contains(rect: Rect, x: number, y: number): boolean {
   return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
 }
 
-/** Normalised device coordinates of a point inside a viewport. */
 export function toNdc(rect: Rect, x: number, y: number): { x: number; y: number } {
   return {
     x: ((x - rect.x) / rect.width) * 2 - 1,

@@ -119,7 +119,6 @@ describe('sourceIndexFor and slotForSource', () => {
   });
 
   it('maps a slot to the point the sampler copied into it', () => {
-    // The sampler writes source point 0, 10, 20 into slots 0, 1, 2.
     expect(sourceIndexFor(0, 10)).toBe(0);
     expect(sourceIndexFor(1, 10)).toBe(10);
     expect(sourceIndexFor(2, 10)).toBe(20);

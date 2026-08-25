@@ -19,7 +19,6 @@ export function useMeasurement(cloud: PointCloudData): MeasurementState {
   });
 
   const points = useMemo(() => {
-    // Ends belong to the cloud they were picked on; a new cloud starts empty.
     const indices = ends.cloud === cloud ? ends.indices : [];
     return indices
       .filter((index) => index < cloud.pointCount)
@@ -37,7 +36,7 @@ export function useMeasurement(cloud: PointCloudData): MeasurementState {
       }
       setEnds((previous) => {
         const current = previous.cloud === cloud ? previous.indices : [];
-        // Two ends is a measurement; a third click starts a new one.
+
         return { cloud, indices: current.length >= 2 ? [index] : [...current, index] };
       });
     },

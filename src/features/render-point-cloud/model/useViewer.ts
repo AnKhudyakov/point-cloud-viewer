@@ -7,17 +7,6 @@ export interface ViewerActions {
   resetView: () => void;
 }
 
-/**
- * Owns the imperative viewer and keeps it in step with the state React holds.
- *
- * Two effects and no more. One creates and disposes the viewer, the other hands
- * it the current state after every render; the viewer decides what actually
- * changed. Adding a control means adding a field to `SceneState`, not another
- * effect here.
- *
- * The stage ref is passed in rather than returned, so nothing has to read a ref
- * during render to get at it.
- */
 export function useViewer(
   stageRef: RefObject<HTMLDivElement | null>,
   state: SceneState,
@@ -40,8 +29,6 @@ export function useViewer(
     };
   }, [stageRef]);
 
-  // No dependency list: reconciling after every render is the point, and the
-  // viewer skips the work when the state it is handed has not moved.
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) {

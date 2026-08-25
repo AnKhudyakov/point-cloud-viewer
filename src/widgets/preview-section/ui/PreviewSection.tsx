@@ -21,7 +21,6 @@ import { CloudSummary } from './CloudSummary';
 import { type ClickMode, ModeSwitch } from './ModeSwitch';
 import styles from './PreviewSection.module.scss';
 
-/** Kept in TypeScript so the canvas can reserve exactly this much room. */
 const SIDEBAR_WIDTH = 340;
 const SIDEBAR_MARGIN = 32;
 

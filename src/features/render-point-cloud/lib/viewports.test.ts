@@ -98,7 +98,6 @@ describe('toNdc', () => {
   it('is relative to the viewport, not the canvas', () => {
     const offset = { x: 400, y: 0, width: 400, height: 600 };
 
-    // A click on the left edge of the right hand viewport is at x = -1 there.
     expect(toNdc(offset, 400, 300).x).toBe(-1);
   });
 });

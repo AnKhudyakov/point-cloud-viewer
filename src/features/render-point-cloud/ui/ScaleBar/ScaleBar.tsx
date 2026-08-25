@@ -6,10 +6,6 @@ interface ScaleBarProps {
   unit: string;
 }
 
-/**
- * Reads correct at any zoom and any window size because both numbers come from
- * the live camera and viewport, recomputed with the stats.
- */
 export function ScaleBar({ meters, pixels, unit }: ScaleBarProps) {
   if (meters <= 0 || pixels <= 0) {
     return null;

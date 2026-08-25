@@ -17,25 +17,11 @@ import type { Rect } from '../lib/viewports';
 export const LABEL_CLASS = 'point-cloud-label';
 export const SCALE_TARGET_PX = 130;
 
-/** How far the label sits from its anchor, in screen pixels. */
 const LEADER_LENGTH_PX = 42;
 const MAX_ANNOTATIONS = 8;
 const LINE_COLOR = 0xffffff;
 const LEADER_COLOR = 0x8b949e;
 
-/**
- * Everything drawn on top of the cloud: the measured segment, the leader lines,
- * the labels, and the scale bar.
- *
- * Labels are DOM elements the overlay moves itself every frame. Routing them
- * through React would mean a re-render per frame, and at sixty frames a second
- * that is the wrong tool.
- *
- * The leaders live in the scene rather than in screen space, so they sit at the
- * right depth among the points. Their length is still chosen in pixels and
- * converted to world units at each anchor's distance, which keeps them the same
- * size on screen however far the camera is.
- */
 export class AnnotationOverlay {
   readonly objects: readonly Object3D[];
 
@@ -129,7 +115,6 @@ export class AnnotationOverlay {
     this.leaders.geometry.setDrawRange(0, this.annotations.length * 2);
   }
 
-  /** Repositions labels and rebuilds the leaders. Called once per frame. */
   update(camera: PerspectiveCamera, viewport: Rect): void {
     if (this.disposed) {
       return;

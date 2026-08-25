@@ -47,8 +47,6 @@ describe('sceneChanges', () => {
   });
 
   it('re-applies the budget when the cloud changes, which is the whole point', () => {
-    // Loading a cloud builds a new object at full budget, so a stale budget
-    // would leave the slider and the viewer disagreeing.
     const changes = sceneChanges(state(), state());
 
     expect(changes.cloud).toBe(true);

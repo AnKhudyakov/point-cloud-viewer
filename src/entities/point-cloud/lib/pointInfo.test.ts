@@ -31,7 +31,6 @@ describe('describePoint', () => {
   });
 
   it('keeps the dataset coordinate accurate at UTM magnitudes', () => {
-    // Reading the absolute easting from a float32 would lose about 30 mm here.
     const absolute = describePoint(cloud, 1).absolute[0];
 
     expect(absolute).toBeCloseTo(412355.678, 6);

@@ -11,14 +11,6 @@ export interface SceneChanges {
   layout: boolean;
 }
 
-/**
- * What the viewer has to redo to match the requested state.
- *
- * Loading a cloud builds a new geometry and material, which resets the budget,
- * the selection and every uniform. So a cloud change marks everything that
- * hangs off the cloud as changed too. Without that rule the two sides drift:
- * the slider keeps saying twenty thousand points while the viewer draws them all.
- */
 export function sceneChanges(previous: SceneState | null, next: SceneState): SceneChanges {
   const cloud = previous === null || previous.cloud !== next.cloud;
 
@@ -30,7 +22,7 @@ export function sceneChanges(previous: SceneState | null, next: SceneState): Sce
     clip: cloud || !sameClip(previous.clip, next.clip),
     measurement: cloud || !sameMeasurement(previous.measurement, next.measurement),
     annotations: cloud || !sameAnnotations(previous.annotations, next.annotations),
-    // Layout does not depend on the cloud: the viewport survives a swap.
+
     layout:
       previous === null || previous.split !== next.split || previous.rightInset !== next.rightInset,
   };

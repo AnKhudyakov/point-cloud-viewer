@@ -22,7 +22,6 @@ describe('describeSegment', () => {
   });
 
   it('separates the slope distance from its horizontal shadow', () => {
-    // A 3 4 5 triangle standing on a 5 meter run.
     const segment = describeSegment([0, 0, 0], [3, 4, 12]);
 
     expect(segment.horizontal).toBe(5);
