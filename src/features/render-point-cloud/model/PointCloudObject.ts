@@ -39,15 +39,17 @@ export class PointCloudObject {
 
   private readonly source: PointCloudData;
 
-  private readonly positions: BufferAttribute;
+  private readonly positionAttribute: BufferAttribute;
 
-  private readonly scalars: BufferAttribute;
+  private readonly scalarAttribute: BufferAttribute;
 
-  private readonly slots: BufferAttribute;
+  private readonly slotAttribute: BufferAttribute;
 
   private readonly positionData: Float32Array;
 
   private readonly scalarData: Float32Array;
+
+  private readonly slotData: Float32Array;
 
   private drawn = 0;
 
@@ -60,19 +62,19 @@ export class PointCloudObject {
 
     this.positionData = new Float32Array(this.capacity * 3);
     this.scalarData = new Float32Array(this.capacity);
-    this.positions = new BufferAttribute(this.positionData, 3);
-    this.scalars = new BufferAttribute(this.scalarData, 1);
+    this.positionAttribute = new BufferAttribute(this.positionData, 3);
+    this.scalarAttribute = new BufferAttribute(this.scalarData, 1);
 
-    const slotData = new Float32Array(this.capacity);
+    this.slotData = new Float32Array(this.capacity);
     for (let i = 0; i < this.capacity; i += 1) {
-      slotData[i] = i;
+      this.slotData[i] = i;
     }
-    this.slots = new BufferAttribute(slotData, 1);
+    this.slotAttribute = new BufferAttribute(this.slotData, 1);
 
     this.geometry = new BufferGeometry();
-    this.geometry.setAttribute('position', this.positions);
-    this.geometry.setAttribute('scalar', this.scalars);
-    this.geometry.setAttribute('slot', this.slots);
+    this.geometry.setAttribute('position', this.positionAttribute);
+    this.geometry.setAttribute('scalar', this.scalarAttribute);
+    this.geometry.setAttribute('slot', this.slotAttribute);
     this.geometry.boundingBox = data.bounds.clone();
     this.geometry.boundingSphere = data.bounds.getBoundingSphere(new Sphere());
 
@@ -94,10 +96,10 @@ export class PointCloudObject {
     const written = sampleByStride(this.source.positions, this.positionData, 3, wanted, stride);
     sampleByStride(this.source.scalars, this.scalarData, 1, wanted, stride);
 
-    this.positions.addUpdateRange(0, written * 3);
-    this.positions.needsUpdate = true;
-    this.scalars.addUpdateRange(0, written);
-    this.scalars.needsUpdate = true;
+    this.positionAttribute.addUpdateRange(0, written * 3);
+    this.positionAttribute.needsUpdate = true;
+    this.scalarAttribute.addUpdateRange(0, written);
+    this.scalarAttribute.needsUpdate = true;
 
     this.geometry.setDrawRange(0, written);
     this.drawn = written;
